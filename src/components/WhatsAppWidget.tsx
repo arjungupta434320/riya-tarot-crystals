@@ -54,9 +54,9 @@ export default function WhatsAppWidget() {
       </span>
       
       {/* Tooltip */}
-      <div className="hidden md:block absolute right-full mr-4 bg-[#FFFFFF] text-[#51473C] border border-[#E9E1D5] text-xs py-2 px-3 rounded-[3px] shadow-[0_4px_14px_rgba(81,71,60,0.08)] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-medium">
+      <div className="hidden md:block absolute right-full mr-4 bg-white text-primary text-xs py-2 px-3 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-medium">
         Chat with us
-        <div className="absolute top-1/2 -right-1 -translate-y-1/2 border-y-4 border-y-transparent border-l-4 border-l-[#FFFFFF]"></div>
+        <div className="absolute top-1/2 -right-1 -translate-y-1/2 border-y-4 border-y-transparent border-l-4 border-l-white"></div>
       </div>
     </button>
   );

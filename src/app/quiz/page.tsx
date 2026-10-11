@@ -10,32 +10,32 @@ import { Product, useStore } from "@/store/useStore";
 const questions = [
   {
     id: 1,
-    title: "What intention calls to you most right now?",
+    title: "What do you need the most right now?",
     options: [
-      { text: "Love, Softness & Self-Worth", category: "Love" },
-      { text: "Abundance, Success & Wealth", category: "Abundance" },
-      { text: "Peace, Serenity & Emotional Calm", category: "Calm" },
-      { text: "Protection, Energy Shield & Focus", category: "Protection" }
+      { text: "Love & Healing", category: "Love" },
+      { text: "Money & Success", category: "Abundance" },
+      { text: "Peace & Calm", category: "Calm" },
+      { text: "Protection & Boundaries", category: "Protection" }
     ]
   },
   {
     id: 2,
-    title: "Which gemstone tone harmonizes with your style?",
+    title: "Which color calls out to your soul?",
     options: [
-      { text: "Soft Rose Quartz & Blush Pinks" },
-      { text: "Calm Turquoise & Soft Sage" },
-      { text: "Warm Champagne & Golden Citrine" },
-      { text: "Grounding Earth Browns & Tiger Eye" }
+      { text: "Soft Pinks & Deep Reds" },
+      { text: "Calming Blues & Greens" },
+      { text: "Warm Yellows & Golds" },
+      { text: "Protective Blacks & Browns" }
     ]
   },
   {
     id: 3,
-    title: "How do you intend to practice with your crystal?",
+    title: "How do you plan to use your crystals?",
     options: [
-      { text: "Daily Luxury Jewelry Wear" },
-      { text: "Morning Intention & Meditation" },
-      { text: "Desk Anchor for Work Rituals" },
-      { text: "A Meaningful Heirloom Gift" }
+      { text: "Daily Wear (Jewelry)" },
+      { text: "Meditation & Manifestation" },
+      { text: "Placing in my Home/Office" },
+      { text: "A Gift for someone special" }
     ]
   }
 ];
@@ -55,7 +55,7 @@ export default function CrystalQuiz() {
     if (currentQuestion < questions.length - 1) {
       setTimeout(() => {
         setCurrentQuestion(currentQuestion + 1);
-      }, 350);
+      }, 400);
     } else {
       analyzeResults(newAnswers);
     }
@@ -63,6 +63,8 @@ export default function CrystalQuiz() {
 
   const analyzeResults = async (finalAnswers: Record<number, string>) => {
     setIsAnalyzing(true);
+    
+    // The first question determines the primary category
     const targetCategory = finalAnswers[0] || "Love";
 
     try {
@@ -76,18 +78,16 @@ export default function CrystalQuiz() {
       
       let finalRecs = data as Product[];
       
-      if (!finalRecs || finalRecs.length === 0) {
-        const { data: fallback } = await supabase
-          .from('products')
-          .select('*')
-          .limit(2);
-        finalRecs = fallback as Product[];
+      // If we didn't find 2 products, fallback and get any 2
+      if (finalRecs.length < 2) {
+        const { data: fallbackData } = await supabase.from('products').select('*').limit(2);
+        finalRecs = fallbackData as Product[] || [];
       }
 
       setTimeout(() => {
-        setRecommendations(finalRecs || []);
+        setRecommendations(finalRecs);
         setIsAnalyzing(false);
-      }, 1500);
+      }, 2500);
     } catch (err) {
       console.error("Quiz error", err);
       setError(true);
@@ -104,54 +104,47 @@ export default function CrystalQuiz() {
   };
 
   const addBothToBag = (e: React.MouseEvent) => {
-    if (recommendations[0]) {
-      import("@/lib/animations").then(m => m.flyToCart(e, recommendations[0].image));
-    }
+    import("@/lib/animations").then(m => m.flyToCart(e, recommendations[0].image));
     recommendations.forEach(product => addToCart(product, 1));
-    setTimeout(() => useStore.setState({ isCartOpen: true }), 700);
+    setTimeout(() => useStore.setState({ isCartOpen: true }), 800);
   };
 
   return (
-    <div className="min-h-screen pt-28 md:pt-36 pb-24 bg-[#FFFCF7] text-[#51473C] flex flex-col items-center">
-      <div className="container mx-auto px-6 max-w-3xl">
+    <div className="min-h-screen pt-32 pb-24 bg-background flex flex-col items-center">
+      <div className="container mx-auto px-6 max-w-4xl">
         
         {!isAnalyzing && recommendations.length === 0 && (
           <>
             <div className="text-center mb-12">
-              <div className="w-14 h-14 mx-auto bg-[#F8F1E8] border border-[#E9E1D5] text-[#B99B6B] rounded-full flex items-center justify-center mb-5 shadow-xs">
-                <Sparkles size={22} />
+              <div className="w-16 h-16 mx-auto bg-primary text-secondary rounded-full flex items-center justify-center mb-6">
+                <Sparkles size={24} />
               </div>
-              <span className="text-[11px] tracking-[0.25em] uppercase text-[#B99B6B] font-semibold block mb-2">
-                Personal Intention Guide
-              </span>
-              <h1 className="font-serif text-3xl md:text-5xl mb-4 text-[#51473C] tracking-wide">
-                Crystal Intention Quiz
-              </h1>
-              <p className="text-[#817569] text-xs sm:text-sm font-light max-w-lg mx-auto leading-relaxed">
-                Tune into your present frequency. Answer 3 intuitive questions to reveal the gemstone bracelet attuned to your current chapter.
+              <h1 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-5xl mb-4 text-primary tracking-[0.1em]">Crystal Finder Quiz</h1>
+              <p className="text-primary/70 text-sm md:text-base max-w-lg mx-auto">
+                Let your intuition guide you. Answer 3 simple questions and we will reveal the crystals whose energy perfectly aligns with your current journey.
               </p>
             </div>
 
-            <div className="card-luxury bg-[#FFFFFF] border border-[#E9E1D5] p-6 sm:p-10 shadow-[0_8px_30px_rgba(81,71,60,0.04)] rounded-[4px] max-w-2xl mx-auto">
-              <div className="flex justify-between items-center mb-8 text-xs tracking-widest text-[#817569] uppercase font-medium">
-                <span>Step {currentQuestion + 1} of {questions.length}</span>
+            <div className="bg-white border border-primary/10 p-8 md:p-12 shadow-sm max-w-3xl mx-auto">
+              <div className="flex justify-between items-center mb-8 text-xs tracking-widest text-primary/40 uppercase">
+                <span>Question {currentQuestion + 1} of {questions.length}</span>
                 {currentQuestion > 0 && (
-                  <button onClick={() => setCurrentQuestion(currentQuestion - 1)} className="hover:text-[#51473C] flex items-center gap-1 transition-colors">
-                    <ArrowLeft size={13} /> Previous
+                  <button onClick={() => setCurrentQuestion(currentQuestion - 1)} className="hover:text-primary flex items-center gap-1">
+                    <ArrowLeft size={12} /> Back
                   </button>
                 )}
               </div>
               
-              <h2 className="font-serif text-2xl sm:text-3xl mb-8 text-center text-[#51473C] font-normal leading-snug">
+              <h2 className="font-[family-name:var(--font-cinzel)] text-2xl md:text-3xl mb-8 text-center text-primary">
                 {questions[currentQuestion].title}
               </h2>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {questions[currentQuestion].options.map((opt, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSelectOption(opt)}
-                    className="border border-[#E9E1D5] bg-[#FFFFFF] p-5 text-xs font-semibold tracking-wider uppercase hover:bg-[#F4E9D9] hover:border-[#B99B6B] text-[#51473C] transition-all duration-300 text-center rounded-[3px]"
+                    className="border border-primary/20 p-6 text-sm font-semibold tracking-wide hover:bg-secondary hover:border-primary transition-all duration-300 text-center"
                   >
                     {opt.text}
                   </button>
@@ -163,36 +156,32 @@ export default function CrystalQuiz() {
 
         {isAnalyzing && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-12 h-12 border-2 border-[#51473C] border-t-transparent rounded-full animate-spin mb-6"></div>
-            <h2 className="font-serif text-2xl md:text-3xl text-[#51473C] mb-3">Attuning with your intention...</h2>
-            <p className="text-[#817569] text-xs font-light tracking-wider">Matching gemstone vibrations to your selected preferences.</p>
+            <div className="w-16 h-16 border-t-2 border-primary border-solid rounded-full animate-spin mb-8"></div>
+            <h2 className="font-[family-name:var(--font-cinzel)] text-2xl md:text-3xl text-primary mb-4 animate-pulse tracking-widest">Reading your energy...</h2>
+            <p className="text-primary/60 font-light tracking-wide">Calculating your Aura profile and finding the perfect crystals.</p>
           </div>
         )}
 
         {recommendations.length > 0 && !isAnalyzing && (
-          <div className="text-center animate-in fade-in duration-700">
-            <span className="text-[11px] tracking-[0.25em] uppercase text-[#B99B6B] font-semibold block mb-2">
-              ✦ Your Intention Match ✦
-            </span>
-            <h1 className="font-serif text-3xl md:text-5xl mb-10 text-[#51473C] tracking-wide">
-              Curated Specifically For You
-            </h1>
+          <div className="text-center animate-in fade-in zoom-in duration-700">
+            <h2 className="text-xs tracking-[0.2em] uppercase text-accent mb-4 font-bold">Your Aura Profile Match</h2>
+            <h1 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-5xl mb-12 text-primary tracking-wide">The Universe Chose These For You</h1>
             
-            <div className="grid sm:grid-cols-2 gap-6 mb-10">
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
               {recommendations.map((rec) => (
-                <div key={rec.id} className="card-luxury p-4 bg-[#FFFFFF] flex flex-col text-left">
-                  <Link href={`/product?id=${rec.id}`} className="block relative aspect-square bg-[#F8F1E8] rounded-[2px] overflow-hidden mb-4 border border-[#E9E1D5]/60 group">
+                <div key={rec.id} className="bg-white border border-primary/10 shadow-lg group relative flex flex-col">
+                  <Link href={`/product?id=${rec.id}`} className="block relative aspect-square bg-secondary overflow-hidden">
                     <Image 
-                      src={rec.image || "/images/products/rose-quartz-new.jpg"} 
+                      src={rec.image || "https://images.unsplash.com/photo-1598046125712-4299b9eb2491"} 
                       alt={rec.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   </Link>
-                  <div className="flex flex-col flex-grow">
-                    <h3 className="font-semibold text-xs tracking-widest uppercase text-[#51473C] mb-1">{rec.name}</h3>
-                    <p className="text-sm font-semibold text-[#51473C] mb-3">₹{(rec.salePrice || rec.price).toLocaleString('en-IN')}</p>
-                    <p className="text-[11px] font-light text-[#817569] line-clamp-2 mb-5 flex-grow">
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="font-[family-name:var(--font-cinzel)] font-bold text-xl mb-2 text-primary tracking-wide">{rec.name}</h3>
+                    <p className="text-lg text-primary font-medium mb-4">₹{(rec.salePrice || rec.price).toLocaleString('en-IN')}</p>
+                    <p className="text-xs font-light leading-relaxed text-primary/70 line-clamp-3 mb-6 flex-grow">
                       {rec.description}
                     </p>
                     <button 
@@ -200,7 +189,7 @@ export default function CrystalQuiz() {
                         import("@/lib/animations").then(m => m.flyToCart(e, rec.image));
                         addToCart(rec, 1);
                       }}
-                      className="btn-primary w-full py-2.5 text-[11px]"
+                      className="w-full border border-primary text-primary text-xs tracking-widest uppercase py-3 hover:bg-primary hover:text-secondary transition-colors"
                     >
                       Add To Bag
                     </button>
@@ -209,30 +198,30 @@ export default function CrystalQuiz() {
               ))}
             </div>
 
-            <div className="bg-[#F8F1E8] p-6 sm:p-8 border border-[#E9E1D5] rounded-[4px] mb-8 max-w-lg mx-auto">
-              <h3 className="font-serif text-xl mb-2 text-[#51473C]">The Complementary Duo</h3>
-              <p className="text-xs text-[#817569] font-light mb-6">Wear these two stones layered together to amplify and ground your intentions.</p>
+            <div className="max-w-xl mx-auto bg-secondary/30 p-8 border border-primary/10 mb-8">
+              <h3 className="font-serif text-xl mb-2 text-primary">The Ultimate Healing Bundle</h3>
+              <p className="text-sm text-primary/70 mb-6">These two crystals work perfectly in tandem to balance your energy.</p>
               <button 
                 onClick={addBothToBag}
-                className="btn-primary w-full py-3 text-xs"
+                className="w-full bg-primary text-secondary text-sm tracking-widest uppercase py-4 hover:bg-accent transition-colors shadow-lg"
               >
-                Add Both Pieces To Bag
+                Add Both To Bag
               </button>
             </div>
 
             <button 
               onClick={resetQuiz}
-              className="text-xs tracking-widest uppercase text-[#817569] hover:text-[#51473C] transition-colors border-b border-[#817569]/30 pb-0.5"
+              className="text-xs tracking-widest uppercase text-primary/50 hover:text-primary transition-colors underline underline-offset-4"
             >
-              Retake Intention Quiz
+              Retake Quiz
             </button>
           </div>
         )}
 
         {error && (
-          <div className="text-center py-20">
-            <p className="text-[#51473C] mb-4">Please try again in a moment.</p>
-            <button onClick={resetQuiz} className="btn-primary">Restart Quiz</button>
+          <div className="text-center py-24">
+            <p className="text-red-500 mb-6">Our connection was interrupted. Please try again.</p>
+            <button onClick={resetQuiz} className="bg-primary text-white px-8 py-3 text-sm">Restart Quiz</button>
           </div>
         )}
 

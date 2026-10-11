@@ -1,124 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Manrope:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  /* LIGHT LUXURY COLOR SYSTEM */
-  --background: #FFFCF7; /* Pearl Ivory */
-  --foreground: #51473C; /* Warm Brown */
+  --background: #FFFDF8;
+  --foreground: #382400;
   
-  --color-canvas: #FFFCF7;
-  --color-champagne: #F4E9D9;
-  --color-cream: #F8F1E8;
-  --color-surface: #FFFFFF;
+  --color-primary: #7D5306;
+  --color-secondary: #F6EDDC;
+  --color-accent: #F4B139;
   
-  --color-primary: #51473C;
-  --color-primary-hover: #3E362D;
-  --color-secondary: #F4E9D9;
-  --color-card: #F8F1E8;
-  --color-muted: #817569;
-  --color-border: #E9E1D5;
-  --color-gold: #B99B6B;
-  --color-accent: #B99B6B;
-  
-  /* Supporting Accents */
-  --color-rose: #EBCFCB;
-  --color-sage: #DCE8DC;
-  --color-lavender: #EAE1F0;
+  --color-soft-purple: #C4A0CC;
+  --color-warm-beige: #BCAC8C;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   
-  --color-canvas: var(--color-canvas);
-  --color-champagne: var(--color-champagne);
-  --color-cream: var(--color-cream);
-  --color-surface: var(--color-surface);
-  
   --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
   --color-secondary: var(--color-secondary);
-  --color-card: var(--color-card);
-  --color-muted: var(--color-muted);
-  --color-border: var(--color-border);
-  --color-gold: var(--color-gold);
   --color-accent: var(--color-accent);
-  
-  --color-rose: var(--color-rose);
-  --color-sage: var(--color-sage);
-  --color-lavender: var(--color-lavender);
+  --color-soft-purple: var(--color-soft-purple);
+  --color-warm-beige: var(--color-warm-beige);
 
-  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --font-sans: var(--font-manrope), "Manrope", -apple-system, sans-serif;
-  --font-cinzel: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
 }
 
 body {
-  background-color: #FFFCF7;
-  color: #51473C;
-  font-family: var(--font-manrope), 'Manrope', -apple-system, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
-  color: #51473C;
-}
-
-/* Light Luxury Component Classes */
-.btn-primary {
-  background-color: #51473C;
-  color: #FFFCF7;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.875rem 1.75rem;
-  border-radius: 3px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-primary:hover {
-  background-color: #3E362D;
-  box-shadow: 0 4px 14px rgba(81, 71, 60, 0.15);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: #51473C;
-  border: 1px solid #51473C;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.875rem 1.75rem;
-  border-radius: 3px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-secondary:hover {
-  background-color: #F4E9D9;
-  border-color: #B99B6B;
-}
-
-.card-luxury {
-  background-color: #FFFFFF;
-  border: 1px solid #E9E1D5;
-  border-radius: 4px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
-.card-luxury:hover {
-  border-color: #B99B6B;
-  box-shadow: 0 8px 24px rgba(81, 71, 60, 0.08);
+  font-family: var(--font-serif);
 }
 
 .magnetic-button {
-  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s, border-color 0.3s;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s;
 }
 .magnetic-button:hover {
   transform: translateY(-2px);
