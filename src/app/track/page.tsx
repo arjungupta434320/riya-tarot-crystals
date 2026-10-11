@@ -40,14 +40,14 @@ export default function TrackOrderPage() {
   };
 
   return (
-    <div className="min-h-[80vh] pt-32 pb-24 bg-background flex flex-col items-center">
+    <div className="min-h-[80vh] pt-32 pb-24 bg-[#FFFCF7] text-[#51473C] flex flex-col items-center">
       <div className="container mx-auto px-6 max-w-2xl">
         <div className="text-center mb-12">
-          <div className="w-16 h-16 mx-auto bg-secondary text-primary rounded-full flex items-center justify-center mb-6 border border-primary/10">
-            <Package size={24} />
+          <div className="w-16 h-16 mx-auto bg-[#F8F1E8] text-[#B99B6B] rounded-full flex items-center justify-center mb-6 border border-[#E9E1D5] shadow-xs">
+            <Package size={24} strokeWidth={1.5} />
           </div>
-          <h1 className="font-serif text-3xl md:text-4xl mb-4 text-primary">Track Your Order</h1>
-          <p className="text-primary/70 text-sm">Enter the email address used during checkout to view the status of your recent orders.</p>
+          <h1 className="font-serif text-3xl md:text-4xl mb-3 text-[#51473C]">Track Your Order</h1>
+          <p className="text-[#817569] text-xs sm:text-sm font-light">Enter the email address used during checkout to view the status of your recent orders.</p>
         </div>
 
         <form onSubmit={handleTrack} className="flex gap-2 mb-12">
@@ -57,14 +57,14 @@ export default function TrackOrderPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address" 
-            className="flex-grow bg-transparent border border-primary/20 px-4 py-4 text-base focus:outline-none focus:border-primary transition-colors"
+            className="flex-grow bg-[#FFFFFF] border border-[#E9E1D5] px-4 py-3.5 text-base text-[#51473C] placeholder-[#817569]/60 focus:outline-none focus:border-[#B99B6B] transition-colors rounded-[3px]"
           />
           <button 
             type="submit" 
             disabled={loading}
-            className="px-8 bg-primary text-secondary text-xs tracking-widest uppercase hover:bg-accent transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-8 bg-[#51473C] text-[#FFFCF7] hover:bg-[#3E362D] text-xs tracking-widest uppercase transition-colors disabled:opacity-50 flex items-center gap-2 font-medium rounded-[3px]"
           >
-            {loading ? "Searching..." : <><Search size={16} /> Track</>}
+            {loading ? "Searching..." : <><Search size={15} /> Track</>}
           </button>
         </form>
 
@@ -106,13 +106,13 @@ export default function TrackOrderPage() {
               }
 
               return (
-                <div key={order.id} className="bg-white border border-primary/10 p-6 shadow-sm">
-                  <div className="flex justify-between items-start mb-6 pb-6 border-b border-primary/5">
+                <div key={order.id} className="bg-[#FFFFFF] border border-[#E9E1D5] p-6 rounded-[4px] shadow-xs">
+                  <div className="flex justify-between items-start mb-6 pb-6 border-b border-[#E9E1D5]">
                     <div>
-                      <p className="text-xs text-primary/40 uppercase tracking-widest mb-1">
+                      <p className="text-xs text-[#817569] uppercase tracking-widest mb-1">
                         Order #{order.id.split('-')[0]}
                       </p>
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium text-[#51473C]">
                         {new Date(order.created_at).toLocaleDateString('en-IN', {
                           year: 'numeric', month: 'long', day: 'numeric'
                         })}
@@ -127,20 +127,20 @@ export default function TrackOrderPage() {
                   <div className="space-y-4 mb-6">
                     {order.items.map((item: any, idx: number) => (
                       <div key={idx} className="flex justify-between items-center text-sm">
-                        <span className="text-primary/80 flex items-center gap-3">
-                          <span className="w-6 h-6 bg-secondary flex items-center justify-center text-xs rounded-full">
+                        <span className="text-[#51473C] flex items-center gap-3">
+                          <span className="w-6 h-6 bg-[#F4E9D9] text-[#51473C] flex items-center justify-center text-xs rounded-full font-medium">
                             {item.quantity}
                           </span>
                           {item.name}
                         </span>
-                        <span>₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
+                        <span className="font-medium text-[#51473C]">₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex justify-between items-center pt-4 border-t border-primary/5">
-                    <span className="text-xs uppercase tracking-widest text-primary/60">Total</span>
-                    <span className="font-semibold text-lg">₹{order.total_amount.toLocaleString('en-IN')}</span>
+                  <div className="flex justify-between items-center pt-4 border-t border-[#E9E1D5]">
+                    <span className="text-xs uppercase tracking-widest text-[#817569]">Total</span>
+                    <span className="font-semibold text-lg text-[#51473C]">₹{order.total_amount.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
               )

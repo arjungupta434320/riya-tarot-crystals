@@ -182,7 +182,7 @@ function ProductContent() {
   }
 
   return (
-    <div className="pt-4 md:pt-8 pb-12 bg-background">
+    <div className="pt-6 md:pt-10 pb-20 bg-[#FFFCF7] text-[#51473C]">
       
       {/* Product Top Section */}
       <div className="container mx-auto px-6">
@@ -303,21 +303,23 @@ function ProductContent() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-4 mb-8 relative z-10">
-              <div className="flex gap-4">
-                <div className="flex items-center border border-primary/20 w-32 justify-between">
+            <div className="flex flex-col gap-3.5 mb-8 relative z-10">
+              <div className="flex gap-3">
+                <div className="flex items-center border border-[#E9E1D5] bg-[#FFFFFF] w-32 justify-between rounded-[3px]">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-4 hover:bg-secondary transition-colors"
+                    className="px-3.5 py-3 hover:bg-[#F4E9D9] transition-colors text-[#51473C]"
+                    aria-label="Decrease quantity"
                   >
-                    <Minus size={16} />
+                    <Minus size={15} />
                   </button>
-                  <span className="text-sm">{quantity}</span>
+                  <span className="text-sm text-[#51473C] font-medium">{quantity}</span>
                   <button 
                     onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-4 hover:bg-secondary transition-colors"
+                    className="px-3.5 py-3 hover:bg-[#F4E9D9] transition-colors text-[#51473C]"
+                    aria-label="Increase quantity"
                   >
-                    <Plus size={16} />
+                    <Plus size={15} />
                   </button>
                 </div>
                 
@@ -326,7 +328,7 @@ function ProductContent() {
                     import("@/lib/animations").then(m => m.flyToCart(e, displayImage || product.image));
                     addToCart(product, quantity);
                   }}
-                  className="flex-grow bg-primary text-secondary text-sm tracking-widest uppercase hover:bg-accent transition-colors magnetic-button"
+                  className="flex-grow bg-[#51473C] text-[#FFFCF7] text-xs tracking-[0.15em] uppercase hover:bg-[#3E362D] transition-all duration-300 font-medium py-3.5 shadow-sm rounded-[3px]"
                 >
                   Add To Bag
                 </button>
@@ -338,7 +340,7 @@ function ProductContent() {
                   useStore.setState({ isCartOpen: false });
                   router.push('/checkout');
                 }}
-                className="w-full border border-primary/20 text-primary text-sm tracking-widest uppercase py-4 hover:bg-secondary transition-colors magnetic-button"
+                className="w-full bg-transparent border border-[#51473C] text-[#51473C] text-xs tracking-[0.15em] uppercase py-3.5 hover:bg-[#F4E9D9] hover:border-[#B99B6B] transition-all duration-300 font-medium rounded-[3px]"
               >
                 Buy It Now
               </button>
@@ -747,18 +749,18 @@ function ProductContent() {
             animate={{ y: 0 }}
             exit={{ y: 100 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-t border-primary/10 p-4 md:hidden flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
+            className="fixed bottom-0 left-0 right-0 z-50 bg-[#FFFCF7]/95 backdrop-blur-md border-t border-[#E9E1D5] p-3.5 md:hidden flex items-center justify-between shadow-[0_-8px_24px_rgba(81,71,60,0.08)]"
           >
             <div className="flex flex-col">
-              <span className="text-xs font-semibold tracking-widest uppercase">{product.name}</span>
-              <span className="text-sm text-primary">₹{(product.salePrice || product.price).toLocaleString('en-IN')}</span>
+              <span className="text-xs font-semibold tracking-wider uppercase text-[#51473C] truncate max-w-[180px]">{product.name}</span>
+              <span className="text-sm font-semibold text-[#51473C]">₹{(product.salePrice || product.price).toLocaleString('en-IN')}</span>
             </div>
             <button 
               onClick={(e) => {
                 import("@/lib/animations").then(m => m.flyToCart(e, product.image));
                 addToCart(product, 1);
               }}
-              className="bg-primary text-secondary px-6 py-3 text-xs tracking-widest uppercase"
+              className="bg-[#51473C] text-[#FFFCF7] hover:bg-[#3E362D] px-6 py-2.5 text-xs tracking-widest uppercase font-medium rounded-[3px] shadow-xs"
             >
               Add To Bag
             </button>

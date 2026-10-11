@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Inter, Cinzel } from "next/font/google";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,19 +8,17 @@ import WhatsAppWidget from "@/components/WhatsAppWidget";
 import React from "react";
 import { AuthProvider } from "@/components/AuthProvider";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-});
-
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -43,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${inter.variable} ${cinzel.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}>
+      <body className={`${cormorant.variable} ${manrope.variable} antialiased min-h-screen flex flex-col bg-background text-foreground font-sans`}>
         <AuthProvider>
           <Navbar />
           <main className="flex-grow">

@@ -194,32 +194,32 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-24 bg-background">
+    <div className="min-h-screen pt-28 md:pt-36 pb-24 bg-[#FFFCF7] text-[#51473C]">
       <div className="container mx-auto px-6 max-w-6xl">
         
-        <Link href="/shop" className="inline-flex items-center gap-2 text-sm text-primary/60 hover:text-primary transition-colors mb-8">
-          <ArrowLeft size={16} /> Back to Shop
+        <Link href="/shop" className="inline-flex items-center gap-2 text-xs tracking-widest uppercase text-[#817569] hover:text-[#51473C] transition-colors mb-8">
+          <ArrowLeft size={14} /> Return to Shop
         </Link>
 
-        <h1 className="font-serif text-3xl md:text-4xl mb-12">Checkout</h1>
+        <h1 className="font-serif text-3xl md:text-5xl mb-10 text-[#51473C]">Secure Checkout</h1>
 
         {cart.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-primary/60 mb-6">Your bag is empty.</p>
-            <Link href="/shop" className="px-8 py-3 bg-primary text-secondary tracking-[0.2em] uppercase text-xs hover:bg-accent transition-colors">
-              Continue Shopping
+          <div className="text-center py-12 card-luxury bg-[#FFFFFF] p-8 max-w-md mx-auto">
+            <p className="text-[#817569] mb-6 text-sm">Your bag is empty.</p>
+            <Link href="/shop" className="btn-primary text-xs">
+              Explore Collection
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
             
             {/* Left Column - Form */}
             <div className="flex-grow lg:w-3/5">
               <form onSubmit={handleSubmit} className="space-y-8">
                 
                 <div>
-                  <h2 className="text-sm font-semibold tracking-widest uppercase mb-4">Contact Information</h2>
-                  <div className="space-y-4">
+                  <h2 className="text-xs font-semibold tracking-widest uppercase mb-4 text-[#51473C]">Contact Information</h2>
+                  <div className="space-y-3.5">
                     <input 
                       type="email" 
                       name="email"
@@ -227,7 +227,7 @@ export default function CheckoutPage() {
                       placeholder="Email address" 
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                      className="w-full bg-[#FFFFFF] border border-[#E9E1D5] px-4 py-3 text-sm text-[#51473C] placeholder-[#817569]/60 focus:outline-none focus:border-[#B99B6B] transition-colors rounded-[3px]"
                     />
                     <input 
                       type="tel" 
@@ -236,14 +236,14 @@ export default function CheckoutPage() {
                       placeholder="Phone number" 
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                      className="w-full bg-[#FFFFFF] border border-[#E9E1D5] px-4 py-3 text-sm text-[#51473C] placeholder-[#817569]/60 focus:outline-none focus:border-[#B99B6B] transition-colors rounded-[3px]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <h2 className="text-sm font-semibold tracking-widest uppercase mb-4">Shipping Address</h2>
-                  <div className="space-y-4">
+                  <h2 className="text-xs font-semibold tracking-widest uppercase mb-4 text-[#51473C]">Shipping Address</h2>
+                  <div className="space-y-3.5">
                     <input 
                       type="text" 
                       name="name"
@@ -251,7 +251,7 @@ export default function CheckoutPage() {
                       placeholder="Full name" 
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                      className="w-full bg-[#FFFFFF] border border-[#E9E1D5] px-4 py-3 text-sm text-[#51473C] placeholder-[#817569]/60 focus:outline-none focus:border-[#B99B6B] transition-colors rounded-[3px]"
                     />
                     <textarea 
                       name="address"
@@ -260,7 +260,7 @@ export default function CheckoutPage() {
                       rows={3}
                       value={formData.address}
                       onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors resize-none"
+                      className="w-full bg-[#FFFFFF] border border-[#E9E1D5] px-4 py-3 text-sm text-[#51473C] placeholder-[#817569]/60 focus:outline-none focus:border-[#B99B6B] transition-colors resize-none rounded-[3px]"
                     />
                     <div className="flex gap-4">
                       <input 
@@ -270,7 +270,7 @@ export default function CheckoutPage() {
                         placeholder="City" 
                         value={formData.city}
                         onChange={handleChange}
-                        className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                        className="w-full bg-[#FFFFFF] border border-[#E9E1D5] px-4 py-3 text-sm text-[#51473C] placeholder-[#817569]/60 focus:outline-none focus:border-[#B99B6B] transition-colors rounded-[3px]"
                       />
                       <input 
                         type="text" 
@@ -279,38 +279,38 @@ export default function CheckoutPage() {
                         placeholder="PIN Code" 
                         value={formData.pincode}
                         onChange={handleChange}
-                        className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                        className="w-full bg-[#FFFFFF] border border-[#E9E1D5] px-4 py-3 text-sm text-[#51473C] placeholder-[#817569]/60 focus:outline-none focus:border-[#B99B6B] transition-colors rounded-[3px]"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 className="text-sm font-semibold tracking-widest uppercase mb-4">Payment Method</h2>
-                  <div className="space-y-4">
-                    <label className={`block border ${paymentMethod === 'online' ? 'border-primary bg-primary/5' : 'border-primary/20'} p-4 cursor-pointer transition-colors`}>
+                  <h2 className="text-xs font-semibold tracking-widest uppercase mb-4 text-[#51473C]">Payment Method</h2>
+                  <div className="space-y-3">
+                    <label className={`block border rounded-[3px] ${paymentMethod === 'online' ? 'border-[#B99B6B] bg-[#F4E9D9]/40' : 'border-[#E9E1D5] bg-[#FFFFFF]'} p-4 cursor-pointer transition-colors`}>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <input type="radio" name="payment" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} className="accent-primary" />
-                          <span className="font-medium text-primary">Pay Online (Razorpay)</span>
+                          <input type="radio" name="payment" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} className="accent-[#51473C]" />
+                          <span className="font-medium text-sm text-[#51473C]">Pay Online (Cards, UPI, Netbanking)</span>
                         </div>
-                        <span className="text-[10px] uppercase tracking-widest bg-[#b85c38] text-white px-2 py-1 rounded-sm">Extra 5% Off</span>
+                        <span className="text-[10px] uppercase tracking-wider bg-[#F4E9D9] text-[#51473C] border border-[#B99B6B]/40 px-2.5 py-0.5 rounded-[2px] font-semibold">Extra 5% Off</span>
                       </div>
-                      <p className="text-xs text-primary/60 mt-2 ml-7">Securely pay using UPI, Cards, or Netbanking.</p>
+                      <p className="text-xs text-[#817569] mt-1.5 ml-6">Securely processed via Razorpay encrypted payment gateway.</p>
                     </label>
 
-                    <label className={`block border ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-primary/20'} p-4 cursor-pointer transition-colors`}>
+                    <label className={`block border rounded-[3px] ${paymentMethod === 'cod' ? 'border-[#B99B6B] bg-[#F4E9D9]/40' : 'border-[#E9E1D5] bg-[#FFFFFF]'} p-4 cursor-pointer transition-colors`}>
                       <div className="flex items-center gap-3">
-                        <input type="radio" name="payment" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="accent-primary" />
-                        <span className="font-medium text-primary">Cash on Delivery (COD)</span>
+                        <input type="radio" name="payment" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="accent-[#51473C]" />
+                        <span className="font-medium text-sm text-[#51473C]">Cash on Delivery (COD)</span>
                       </div>
-                      <p className="text-xs text-primary/60 mt-2 ml-7">Pay when your order is delivered to your doorstep.</p>
+                      <p className="text-xs text-[#817569] mt-1.5 ml-6">Pay conveniently when your order arrives at your address.</p>
                     </label>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="p-4 bg-red-50 text-red-600 text-sm border border-red-200">
+                  <div className="p-4 bg-red-50 text-red-700 text-xs border border-red-200 rounded-[3px]">
                     {error}
                   </div>
                 )}
@@ -318,12 +318,12 @@ export default function CheckoutPage() {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full py-4 bg-primary text-secondary text-sm tracking-[0.2em] uppercase hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-4 bg-[#51473C] text-[#FFFCF7] text-xs tracking-[0.18em] uppercase hover:bg-[#3E362D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium rounded-[3px] shadow-sm"
                 >
-                  {loading ? "Processing..." : (paymentMethod === 'cod' ? "Confirm COD Order" : "Proceed to Payment")}
+                  {loading ? "Processing Order..." : (paymentMethod === 'cod' ? "Confirm COD Order" : "Proceed to Secure Payment")}
                 </button>
-                <p className="text-xs text-primary/40 text-center mt-4">
-                  {paymentMethod === 'cod' ? "You will pay upon delivery." : "You will be redirected to securely complete your payment."}
+                <p className="text-[11px] text-[#817569] text-center mt-3 font-light">
+                  {paymentMethod === 'cod' ? "You will pay upon delivery at your doorstep." : "You will be safely redirected to complete 256-bit encrypted checkout."}
                 </p>
 
               </form>
@@ -331,85 +331,85 @@ export default function CheckoutPage() {
 
             {/* Right Column - Order Summary */}
             <div className="lg:w-2/5">
-              <div className="bg-secondary/30 p-6 md:p-8 rounded-sm sticky top-32">
-                <h2 className="text-sm font-semibold tracking-widest uppercase mb-6">Order Summary</h2>
+              <div className="bg-[#F8F1E8] border border-[#E9E1D5] p-6 md:p-8 rounded-[4px] sticky top-32 shadow-xs">
+                <h2 className="text-xs font-semibold tracking-widest uppercase mb-6 text-[#51473C]">Order Summary</h2>
                 
                 <div className="space-y-4 mb-6">
                   {cart.map((item) => (
-                    <div key={item.id} className="flex gap-4">
-                      <div className="relative w-16 h-16 bg-secondary flex-shrink-0">
+                    <div key={item.id} className="flex gap-4 items-center">
+                      <div className="relative w-16 h-16 bg-[#FFFFFF] border border-[#E9E1D5] flex-shrink-0 rounded-[2px] overflow-hidden">
                         <Image 
                           src={item.image} 
                           alt={item.name} 
                           fill 
                           className="object-cover"
                         />
-                        <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-secondary text-[10px] flex items-center justify-center rounded-full">
+                        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#51473C] text-[#FFFCF7] text-[10px] font-medium flex items-center justify-center rounded-full">
                           {item.quantity}
                         </span>
                       </div>
                       <div className="flex-grow flex justify-between items-center">
-                        <span className="text-xs uppercase tracking-widest">{item.name}</span>
-                        <span className="text-sm">₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
+                        <span className="text-xs uppercase tracking-wider text-[#51473C] font-medium">{item.name}</span>
+                        <span className="text-sm font-semibold text-[#51473C]">₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="border-t border-primary/10 pt-4 mb-4 space-y-2">
-                  <div className="flex justify-between text-sm text-primary/60">
+                <div className="border-t border-[#E9E1D5] pt-4 mb-4 space-y-2.5">
+                  <div className="flex justify-between text-xs text-[#817569]">
                     <span>Subtotal</span>
-                    <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                    <span className="text-[#51473C] font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
                   </div>
 
                   {discountAmount > 0 && (
-                    <div className="flex justify-between text-sm text-[#b85c38]">
+                    <div className="flex justify-between text-xs text-[#B99B6B]">
                       <span>Discount (WELCOME20)</span>
-                      <span>- ₹{discountAmount.toLocaleString('en-IN')}</span>
+                      <span className="font-medium">- ₹{discountAmount.toLocaleString('en-IN')}</span>
                     </div>
                   )}
 
                   {onlineDiscountAmount > 0 && (
-                    <div className="flex justify-between text-sm text-[#b85c38]">
+                    <div className="flex justify-between text-xs text-[#B99B6B]">
                       <span>Online Payment Offer (5%)</span>
-                      <span>- ₹{onlineDiscountAmount.toLocaleString('en-IN')}</span>
+                      <span className="font-medium">- ₹{onlineDiscountAmount.toLocaleString('en-IN')}</span>
                     </div>
                   )}
 
-                  <div className="flex justify-between text-sm text-primary/60">
-                    <span>Shipping</span>
-                    <span>Free</span>
+                  <div className="flex justify-between text-xs text-[#817569]">
+                    <span>Complimentary Shipping</span>
+                    <span className="text-[#51473C] font-medium">Free</span>
                   </div>
                 </div>
 
-                <div className="border-t border-primary/20 pt-4 pb-6 border-b mb-6">
-                  <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">Discount Code</p>
+                <div className="border-t border-[#E9E1D5] pt-4 pb-6 border-b mb-6">
+                  <p className="text-[11px] uppercase tracking-widest text-[#817569] font-medium mb-2">Discount Code</p>
                   <div className="flex gap-2">
                     <input 
                       type="text" 
                       value={discountInput}
                       onChange={(e) => setDiscountInput(e.target.value)}
-                      placeholder="Enter code" 
-                      className="flex-grow min-w-0 bg-transparent border border-primary/20 px-3 py-2 text-sm focus:outline-none focus:border-primary uppercase"
+                      placeholder="WELCOME20" 
+                      className="flex-grow min-w-0 bg-[#FFFFFF] border border-[#E9E1D5] px-3.5 py-2 text-xs text-[#51473C] placeholder-[#817569]/50 focus:outline-none focus:border-[#B99B6B] uppercase rounded-[3px]"
                       disabled={!!discountCode}
                     />
                     <button 
                       type="button"
                       onClick={handleApplyDiscount}
                       disabled={!!discountCode}
-                      className="px-4 flex-shrink-0 bg-primary text-secondary text-xs uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50"
+                      className="px-4 flex-shrink-0 bg-[#51473C] text-[#FFFCF7] text-xs uppercase tracking-widest hover:bg-[#3E362D] transition-colors disabled:opacity-50 font-medium rounded-[3px]"
                     >
                       {discountCode ? "Applied" : "Apply"}
                     </button>
                   </div>
-                  {discountError && <p className="text-red-500 text-xs mt-2">{discountError}</p>}
+                  {discountError && <p className="text-red-600 text-xs mt-2">{discountError}</p>}
                 </div>
 
                 <div className="flex justify-between items-end">
-                  <span className="text-sm font-semibold uppercase tracking-widest">Total</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-[#51473C]">Total</span>
                   <div className="text-right">
-                    <span className="text-xs text-primary/40 block">INR</span>
-                    <span className="text-2xl font-medium">₹{finalTotal.toLocaleString('en-IN')}</span>
+                    <span className="text-[10px] text-[#817569] block tracking-wider uppercase font-light">Includes All Taxes</span>
+                    <span className="text-2xl font-serif text-[#51473C]">₹{finalTotal.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 
