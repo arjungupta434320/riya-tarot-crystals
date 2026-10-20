@@ -1,40 +1,46 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Inter, Cinzel } from "next/font/google";
+import { Cinzel, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
+import QuickViewModal from "@/components/QuickViewModal";
+import CheckoutModal from "@/components/CheckoutModal";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
+import StickyMobileCartBar from "@/components/StickyMobileCartBar";
+import MobileBottomNav from "@/components/MobileBottomNav";
+import PolicyModal from "@/components/PolicyModal";
+import QuizModal from "@/components/QuizModal";
+import ToastNotifier from "@/components/ToastNotifier";
 import React from "react";
 import { AuthProvider } from "@/components/AuthProvider";
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
-  title: "Riya Tarot Crystals | Wear Your Intention",
-  description: "Hand-selected crystal bracelets designed for mindful rituals, meaningful gifting and everyday spiritual style.",
+  title: "Riya Tarot Crystals | Certified & Energized Gems",
+  description: "Authentic, lab-certified healed crystal bracelets, natural gemstones, and bespoke Kundali & Chakra curation. 100% natural stones pre-energized with sacred mantras.",
+  icons: {
+    icon: "/images/products/rose-quartz-new.jpg",
+  }
 };
-
 
 export default function RootLayout({
   children,
@@ -43,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${inter.variable} ${cinzel.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}>
+      <body className={`${cinzel.variable} ${plusJakartaSans.variable} font-sans antialiased min-h-screen flex flex-col bg-[#FAF9F6] text-[#2C2A29] pb-24 md:pb-0`}>
         <AuthProvider>
           <Navbar />
           <main className="flex-grow">
@@ -51,6 +57,13 @@ export default function RootLayout({
           </main>
           <Footer />
           <CartDrawer />
+          <QuickViewModal />
+          <CheckoutModal />
+          <PolicyModal />
+          <QuizModal />
+          <StickyMobileCartBar />
+          <MobileBottomNav />
+          <ToastNotifier />
           <React.Suspense fallback={null}>
             <WhatsAppWidget />
           </React.Suspense>

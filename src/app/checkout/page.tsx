@@ -1,423 +1,568 @@
 "use client";
 
-import { useState } from "react";
-import { useStore } from "@/store/useStore";
-import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { useStore } from "@/store/useStore";
+import { submitOrder } from "@/lib/supabaseClient";
+import { 
+  Sparkles, 
+  ShieldCheck, 
+  ArrowLeft, 
+  ArrowRight, 
+  CheckCircle2, 
+  Smartphone, 
+  CreditCard, 
+  Building2, 
+  Banknote,
+  Lock,
+  ShoppingBag
+} from "lucide-react";
+
+const INDIAN_STATES = [
+  "Delhi NCR",
+  "Maharashtra",
+  "Karnataka",
+  "Tamil Nadu",
+  "Gujarat",
+  "Uttar Pradesh",
+  "Telangana",
+  "West Bengal",
+  "Rajasthan",
+  "Punjab",
+  "Haryana",
+  "Madhya Pradesh",
+  "Kerala",
+  "Goa",
+  "Chandigarh",
+  "Other Indian State"
+];
 
 export default function CheckoutPage() {
-  const { cart, clearCart } = useStore();
-  const router = useRouter();
-  
+  const { cart, clearCart, appliedCoupon, applyCoupon, showToast } = useStore();
+
+  const [step, setStep] = useState<"form" | "confirmed">("form");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState("");
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    pincode: ""
-  });
+  // Form Fields
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [city, setCity] = useState("");
+  const [stateName, setStateName] = useState("Delhi NCR");
 
-  const [discountInput, setDiscountInput] = useState("");
-  const [discountCode, setDiscountCode] = useState<string | null>(null);
-  const [discountError, setDiscountError] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState<"standard" | "express">("standard");
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "cards" | "netbanking" | "cod">("upi");
+  const [couponCodeInput, setCouponCodeInput] = useState("");
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const [paymentMethod, setPaymentMethod] = useState<'online' | 'cod'>('online');
+  const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const rawSubtotal = cart.reduce(
+    (sum, item) => sum + (item.salePrice || item.price) * item.quantity,
+    0
+  );
 
-  const subtotal = cart.reduce((total, item) => total + (item.salePrice || item.price) * item.quantity, 0);
-  const discountAmount = discountCode === "WELCOME20" ? subtotal * 0.20 : 0;
-  const onlineDiscountAmount = paymentMethod === 'online' ? subtotal * 0.05 : 0;
-  const finalTotal = subtotal - discountAmount - onlineDiscountAmount;
+  // 15% automatic tiered discount for 2+ items
+  const isTieredQualified = totalQuantity >= 2;
+  const tieredDiscount = isTieredQualified ? Math.round(rawSubtotal * 0.15) : 0;
 
-  const handleApplyDiscount = () => {
-    if (discountInput.trim().toUpperCase() === "WELCOME20") {
-      setDiscountCode("WELCOME20");
-      setDiscountError("");
-    } else {
-      setDiscountError("Invalid discount code");
-    }
+  // Coupon discount
+  let couponDiscount = 0;
+  if (appliedCoupon === "RIYA10") couponDiscount = Math.round(rawSubtotal * 0.10);
+  else if (appliedCoupon === "LUXURY15" || appliedCoupon === "RIYA15") couponDiscount = Math.round(rawSubtotal * 0.15);
+  else if (appliedCoupon === "KUNDALI20") couponDiscount = Math.round(rawSubtotal * 0.20);
+
+  const totalDiscount = tieredDiscount + couponDiscount;
+
+  // Shipping
+  const isFreeStandard = (rawSubtotal - totalDiscount) >= 1499 || rawSubtotal >= 1499;
+  const deliveryFee = deliveryMethod === "express" ? 99 : (isFreeStandard ? 0 : 79);
+
+  const grandTotal = Math.max(0, rawSubtotal - totalDiscount + deliveryFee);
+
+  // Field validations
+  const isPhoneValid = /^[6-9]\d{9}$/.test(phone.replace(/\D/g, ""));
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPincodeValid = /^\d{6}$/.test(pincode.trim());
+  const isNameValid = fullName.trim().length >= 3;
+  const isAddressValid = address.trim().length >= 8;
+  const isCityValid = city.trim().length >= 2;
+
+  const isFormValid = isNameValid && isPhoneValid && isEmailValid && isAddressValid && isPincodeValid && isCityValid;
+
+  const markTouched = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleApplyCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponCodeInput.trim()) return;
+    const res = applyCoupon(couponCodeInput.trim());
+    showToast(res.message, res.success ? "success" : "info");
+    if (res.success) setCouponCodeInput("");
   };
-
-  const loadRazorpay = () => new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cart.length === 0) return;
-    
+    setTouched({
+      fullName: true,
+      phone: true,
+      email: true,
+      address: true,
+      pincode: true,
+      city: true,
+    });
+
+    if (cart.length === 0) {
+      showToast("Your cart is empty.", "info");
+      return;
+    }
+
+    if (!isFormValid) {
+      showToast("Please verify highlighted form fields.", "info");
+      return;
+    }
+
     setLoading(true);
-    setError(null);
+    const orderNum = `#RTC-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    const fullAddress = `${formData.address}, ${formData.city}, ${formData.pincode}`;
-
-    if (paymentMethod === 'cod') {
-      try {
-        const { data: newOrder, error: submitError } = await supabase
-          .from('orders')
-          .insert({
-            customer_name: formData.name,
-            customer_email: formData.email,
-            customer_phone: formData.phone,
-            shipping_address: fullAddress,
-            total_amount: finalTotal,
-            items: cart,
-            status: 'pending_cod'
-          })
-          .select('id')
-          .single();
-        
-        if (submitError) throw submitError;
-        setSuccess(true);
-        clearCart();
-      } catch (err) {
-        setError("Error recording order. Please try again.");
-      } finally {
-        setLoading(false);
+    const res = await submitOrder({
+      customer: {
+        name: fullName,
+        phone,
+        email,
+        address: `${address}${landmark ? `, Near: ${landmark}` : ""}`,
+        city,
+        state: stateName,
+        pincode
+      },
+      items: cart,
+      total: grandTotal,
+      paymentMethod: paymentMethod.toUpperCase(),
+      energizationNote: {
+        name: fullName,
+        dob: "General Astrological Consecration",
+        intention: "General Prosperity & Protection"
       }
-      return;
-    }
+    });
 
-    const isSdkLoaded = await loadRazorpay();
-    if (!isSdkLoaded) {
-      setError("Payment gateway failed to load. Please check your connection.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // 1. Create Razorpay order via Cloudflare function
-      const orderRes = await fetch("/api/razorpay/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: finalTotal })
-      });
-      
-      const orderData = await orderRes.json();
-      if (!orderData.id) throw new Error("Failed to initialize payment");
-
-      // 2. Open Razorpay Checkout Modal
-      const options = {
-        key: orderData.key_id, 
-        amount: orderData.amount, 
-        currency: orderData.currency,
-        name: "Riya Tarot Crystals",
-        description: "Premium Spiritual Jewelry",
-        order_id: orderData.id, 
-        handler: async function (response: any) {
-          try {
-            // 3. Verify Payment
-            const verifyRes = await fetch("/api/razorpay/verify", {
-               method: "POST",
-               headers: { "Content-Type": "application/json" },
-               body: JSON.stringify(response)
-            });
-            const verifyData = await verifyRes.json();
-            
-            if (verifyData.success) {
-               // 4. Save confirmed order to Supabase
-               const { error: submitError } = await supabase
-                 .from('orders')
-                 .insert({
-                   customer_name: formData.name,
-                   customer_email: formData.email,
-                   customer_phone: formData.phone,
-                   shipping_address: fullAddress,
-                   total_amount: finalTotal,
-                   items: cart,
-                   status: 'paid'
-                 });
-                 
-               if (submitError) throw submitError;
-               
-               setSuccess(true);
-               clearCart();
-            } else {
-               setError("Payment verification failed. Please contact support.");
-            }
-          } catch (err) {
-            setError("Error recording order. Please contact support.");
-          }
-        },
-        prefill: {
-            name: formData.name,
-            email: formData.email,
-            contact: formData.phone
-        },
-        theme: {
-            color: "#4f4136" // our primary brand color
-        }
-      };
-      
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        setError(response.error.description);
-      });
-      rzp.open();
-      
-    } catch (err: any) {
-       console.error(err);
-       setError("Something went wrong. Please try again.");
-    } finally {
-       setLoading(false);
-    }
+    setOrderId(res.orderId || orderNum);
+    setLoading(false);
+    setStep("confirmed");
+    clearCart();
   };
 
-  if (success) {
+  if (step === "confirmed") {
     return (
-      <div className="min-h-screen pt-32 pb-24 px-6 flex flex-col items-center justify-center bg-background">
-        <CheckCircle className="text-green-600 mb-6" size={64} />
-        <h1 className="font-serif text-3xl md:text-4xl mb-4 text-center">Order Received!</h1>
-        <p className="text-primary/70 text-center max-w-md mb-8 leading-relaxed">
-          Thank you, {formData.name}. We have successfully received your order. You can track your shipment status at any time using your email address on the <Link href="/track" className="underline hover:text-primary">Track Order</Link> page.
-        </p>
-        <Link href="/" className="px-8 py-3 bg-primary text-secondary tracking-[0.2em] uppercase text-xs hover:bg-accent transition-colors">
-          Return Home
-        </Link>
+      <div className="min-h-screen py-20 bg-[#FAF9F6] text-[#2C2A29] flex items-center justify-center px-4">
+        <div className="max-w-xl w-full p-8 sm:p-12 rounded-3xl bg-[#FFFFFF] border-2 border-[#D4AF37] shadow-[0_20px_50px_rgba(212,175,55,0.22)] text-center space-y-6">
+          <div className="w-20 h-20 rounded-full bg-[#F8F4EC] border-2 border-[#D4AF37] text-[#D4AF37] flex items-center justify-center mx-auto shadow-md">
+            <Sparkles size={34} />
+          </div>
+
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B2C] block mb-1">
+              Order Confirmed & Sacredly Blessed
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2C2A29]">
+              Thank You, {fullName || "Blessed Wearer"}!
+            </h2>
+            <p className="text-xs sm:text-sm text-[#6E6A64] mt-2 leading-relaxed">
+              Your order is in our studio. Each bracelet is being consecrated with 108 Vedic Beej Mantras under Full Moon illumination before insured dispatch.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE5DF] text-xs text-[#2C2A29] space-y-2 text-left">
+            <div className="flex justify-between border-b border-[#EAE5DF] pb-2">
+              <span className="text-[#6E6A64]">Order ID:</span>
+              <strong className="font-mono text-[#9A7B2C]">{orderId}</strong>
+            </div>
+            <div className="flex justify-between border-b border-[#EAE5DF] pb-2">
+              <span className="text-[#6E6A64]">Delivery Destination:</span>
+              <span>{city}, {stateName} ({pincode})</span>
+            </div>
+            <div className="flex justify-between border-b border-[#EAE5DF] pb-2">
+              <span className="text-[#6E6A64]">Selected Payment:</span>
+              <span className="font-semibold">{paymentMethod.toUpperCase()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#6E6A64]">Estimated Arrival:</span>
+              <strong className="text-emerald-800">3–5 Business Days</strong>
+            </div>
+          </div>
+
+          <Link
+            href="/"
+            className="w-full py-4 px-6 rounded-full text-xs font-semibold tracking-wider uppercase text-[#2C2A29] btn-gold-shimmer block"
+          >
+            Return to Collection Home
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-24 bg-background">
-      <div className="container mx-auto px-6 max-w-6xl">
+    <div className="min-h-screen py-10 sm:py-16 bg-[#FAF9F6] text-[#2C2A29]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
         
-        <Link href="/shop" className="inline-flex items-center gap-2 text-sm text-primary/60 hover:text-primary transition-colors mb-8">
-          <ArrowLeft size={16} /> Back to Shop
-        </Link>
+        {/* Navigation Breadcrumb */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#6E6A64] hover:text-[#2C2A29] transition-colors"
+          >
+            <ArrowLeft size={14} />
+            <span>Return to Boutique</span>
+          </Link>
 
-        <h1 className="font-serif text-3xl md:text-4xl mb-12">Checkout</h1>
+          <span className="text-xs font-bold text-[#9A7B2C] flex items-center gap-1.5">
+            <Lock size={13} className="text-[#D4AF37]" />
+            <span>256-Bit SSL Insured Checkout</span>
+          </span>
+        </div>
 
-        {cart.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-primary/60 mb-6">Your bag is empty.</p>
-            <Link href="/shop" className="px-8 py-3 bg-primary text-secondary tracking-[0.2em] uppercase text-xs hover:bg-accent transition-colors">
-              Continue Shopping
-            </Link>
-          </div>
-        ) : (
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
-            
-            {/* Left Column - Form */}
-            <div className="flex-grow lg:w-3/5">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                
-                <div>
-                  <h2 className="text-sm font-semibold tracking-widest uppercase mb-4">Contact Information</h2>
-                  <div className="space-y-4">
-                    <input 
-                      type="email" 
-                      name="email"
-                      required
-                      placeholder="Email address" 
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                    />
-                    <input 
-                      type="tel" 
-                      name="phone"
-                      required
-                      placeholder="Phone number" 
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="text-sm font-semibold tracking-widest uppercase mb-4">Shipping Address</h2>
-                  <div className="space-y-4">
-                    <input 
-                      type="text" 
-                      name="name"
-                      required
-                      placeholder="Full name" 
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                    />
-                    <textarea 
-                      name="address"
-                      required
-                      placeholder="Complete address (House No, Street, Landmark)" 
-                      rows={3}
-                      value={formData.address}
-                      onChange={handleChange}
-                      className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors resize-none"
-                    />
-                    <div className="flex gap-4">
-                      <input 
-                        type="text" 
-                        name="city"
-                        required
-                        placeholder="City" 
-                        value={formData.city}
-                        onChange={handleChange}
-                        className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                      />
-                      <input 
-                        type="text" 
-                        name="pincode"
-                        required
-                        placeholder="PIN Code" 
-                        value={formData.pincode}
-                        onChange={handleChange}
-                        className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="text-sm font-semibold tracking-widest uppercase mb-4">Payment Method</h2>
-                  <div className="space-y-4">
-                    <label className={`block border ${paymentMethod === 'online' ? 'border-primary bg-primary/5' : 'border-primary/20'} p-4 cursor-pointer transition-colors`}>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <input type="radio" name="payment" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} className="accent-primary" />
-                          <span className="font-medium text-primary">Pay Online (Razorpay)</span>
-                        </div>
-                        <span className="text-[10px] uppercase tracking-widest bg-[#b85c38] text-white px-2 py-1 rounded-sm">Extra 5% Off</span>
-                      </div>
-                      <p className="text-xs text-primary/60 mt-2 ml-7">Securely pay using UPI, Cards, or Netbanking.</p>
-                    </label>
-
-                    <label className={`block border ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-primary/20'} p-4 cursor-pointer transition-colors`}>
-                      <div className="flex items-center gap-3">
-                        <input type="radio" name="payment" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="accent-primary" />
-                        <span className="font-medium text-primary">Cash on Delivery (COD)</span>
-                      </div>
-                      <p className="text-xs text-primary/60 mt-2 ml-7">Pay when your order is delivered to your doorstep.</p>
-                    </label>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="p-4 bg-red-50 text-red-600 text-sm border border-red-200">
-                    {error}
-                  </div>
-                )}
-
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full py-4 bg-primary text-secondary text-sm tracking-[0.2em] uppercase hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Processing..." : (paymentMethod === 'cod' ? "Confirm COD Order" : "Proceed to Payment")}
-                </button>
-                <p className="text-xs text-primary/40 text-center mt-4">
-                  {paymentMethod === 'cod' ? "You will pay upon delivery." : "You will be redirected to securely complete your payment."}
-                </p>
-
-              </form>
+        {/* Full Split-Screen Checkout Window */}
+        <div className="rounded-3xl bg-[#FFFFFF] border border-[#EAE5DF] shadow-[0_20px_50px_rgba(212,175,55,0.15)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+          
+          {/* =========================================================
+              LEFT COLUMN: ADDRESS & DELIVERY & PAYMENT (7 cols)
+          ========================================================= */}
+          <div className="lg:col-span-7 p-6 sm:p-10 space-y-6 border-b lg:border-b-0 lg:border-r border-[#EAE5DF]">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#9A7B2C] mb-1">
+                <Sparkles size={13} />
+                <span>Step 1 of 2</span>
+              </div>
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#2C2A29]">
+                Shipping & Consecration Details
+              </h2>
+              <p className="text-xs text-[#6E6A64] mt-0.5">
+                Every bracelet is cleansed and dedicated to your name before insured dispatch.
+              </p>
             </div>
 
-            {/* Right Column - Order Summary */}
-            <div className="lg:w-2/5">
-              <div className="bg-secondary/30 p-6 md:p-8 rounded-sm sticky top-32">
-                <h2 className="text-sm font-semibold tracking-widest uppercase mb-6">Order Summary</h2>
-                
-                <div className="space-y-4 mb-6">
-                  {cart.map((item) => (
-                    <div key={item.id} className="flex gap-4">
-                      <div className="relative w-16 h-16 bg-secondary flex-shrink-0">
-                        <Image 
-                          src={item.image} 
-                          alt={item.name} 
-                          fill 
-                          className="object-cover"
-                        />
-                        <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-secondary text-[10px] flex items-center justify-center rounded-full">
-                          {item.quantity}
-                        </span>
-                      </div>
-                      <div className="flex-grow flex justify-between items-center">
-                        <span className="text-xs uppercase tracking-widest">{item.name}</span>
-                        <span className="text-sm">₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
-                      </div>
-                    </div>
-                  ))}
+            <form id="standalone-checkout-form" onSubmit={handleSubmit} className="space-y-3.5">
+              {/* Full Name */}
+              <div className="floating-input-group">
+                <input
+                  id="s_fullName"
+                  type="text"
+                  required
+                  placeholder=" "
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  onBlur={() => markTouched("fullName")}
+                  className={touched.fullName && !isNameValid ? "!border-rose-400 !bg-rose-50/40" : touched.fullName && isNameValid ? "!border-emerald-500" : ""}
+                />
+                <label htmlFor="s_fullName">Full Name (First and Last Name) *</label>
+              </div>
+
+              {/* Phone & Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="floating-input-group">
+                  <input
+                    id="s_phone"
+                    type="tel"
+                    required
+                    placeholder=" "
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    onBlur={() => markTouched("phone")}
+                    className={touched.phone && !isPhoneValid ? "!border-rose-400 !bg-rose-50/40" : touched.phone && isPhoneValid ? "!border-emerald-500" : ""}
+                  />
+                  <label htmlFor="s_phone">Mobile Number (10 Digits) *</label>
                 </div>
 
-                <div className="border-t border-primary/10 pt-4 mb-4 space-y-2">
-                  <div className="flex justify-between text-sm text-primary/60">
-                    <span>Subtotal</span>
-                    <span>₹{subtotal.toLocaleString('en-IN')}</span>
-                  </div>
+                <div className="floating-input-group">
+                  <input
+                    id="s_email"
+                    type="email"
+                    required
+                    placeholder=" "
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => markTouched("email")}
+                    className={touched.email && !isEmailValid ? "!border-rose-400 !bg-rose-50/40" : touched.email && isEmailValid ? "!border-emerald-500" : ""}
+                  />
+                  <label htmlFor="s_email">Email (Tracking Updates) *</label>
+                </div>
+              </div>
 
-                  {discountAmount > 0 && (
-                    <div className="flex justify-between text-sm text-[#b85c38]">
-                      <span>Discount (WELCOME20)</span>
-                      <span>- ₹{discountAmount.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
+              {/* Street Address */}
+              <div className="floating-input-group">
+                <input
+                  id="s_address"
+                  type="text"
+                  required
+                  placeholder=" "
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  onBlur={() => markTouched("address")}
+                  className={touched.address && !isAddressValid ? "!border-rose-400 !bg-rose-50/40" : touched.address && isAddressValid ? "!border-emerald-500" : ""}
+                />
+                <label htmlFor="s_address">Street Address / House / Flat No. *</label>
+              </div>
 
-                  {onlineDiscountAmount > 0 && (
-                    <div className="flex justify-between text-sm text-[#b85c38]">
-                      <span>Online Payment Offer (5%)</span>
-                      <span>- ₹{onlineDiscountAmount.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
+              {/* Landmark */}
+              <div className="floating-input-group">
+                <input
+                  id="s_landmark"
+                  type="text"
+                  placeholder=" "
+                  value={landmark}
+                  onChange={(e) => setLandmark(e.target.value)}
+                />
+                <label htmlFor="s_landmark">Nearest Landmark (Optional)</label>
+              </div>
 
-                  <div className="flex justify-between text-sm text-primary/60">
-                    <span>Shipping</span>
-                    <span>Free</span>
-                  </div>
+              {/* PIN Code, City, State */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="floating-input-group">
+                  <input
+                    id="s_pincode"
+                    type="text"
+                    required
+                    maxLength={6}
+                    placeholder=" "
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    onBlur={() => markTouched("pincode")}
+                    className={touched.pincode && !isPincodeValid ? "!border-rose-400 !bg-rose-50/40" : touched.pincode && isPincodeValid ? "!border-emerald-500" : ""}
+                  />
+                  <label htmlFor="s_pincode">PIN Code (6 Digits) *</label>
                 </div>
 
-                <div className="border-t border-primary/20 pt-4 pb-6 border-b mb-6">
-                  <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">Discount Code</p>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={discountInput}
-                      onChange={(e) => setDiscountInput(e.target.value)}
-                      placeholder="Enter code" 
-                      className="flex-grow min-w-0 bg-transparent border border-primary/20 px-3 py-2 text-sm focus:outline-none focus:border-primary uppercase"
-                      disabled={!!discountCode}
-                    />
-                    <button 
-                      type="button"
-                      onClick={handleApplyDiscount}
-                      disabled={!!discountCode}
-                      className="px-4 flex-shrink-0 bg-primary text-secondary text-xs uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50"
+                <div className="floating-input-group">
+                  <input
+                    id="s_city"
+                    type="text"
+                    required
+                    placeholder=" "
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    onBlur={() => markTouched("city")}
+                    className={touched.city && !isCityValid ? "!border-rose-400 !bg-rose-50/40" : touched.city && isCityValid ? "!border-emerald-500" : ""}
+                  />
+                  <label htmlFor="s_city">City / District *</label>
+                </div>
+
+                <div className="floating-input-group">
+                  <select
+                    id="s_state"
+                    value={stateName}
+                    onChange={(e) => setStateName(e.target.value)}
+                  >
+                    {INDIAN_STATES.map((st) => (
+                      <option key={st} value={st}>
+                        {st}
+                      </option>
+                    ))}
+                  </select>
+                  <label htmlFor="s_state">State</label>
+                </div>
+              </div>
+            </form>
+
+            {/* Delivery Method Selector */}
+            <div className="pt-2">
+              <h4 className="font-serif text-sm font-semibold text-[#2C2A29] mb-2.5">
+                Delivery Priority
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div
+                  onClick={() => setDeliveryMethod("standard")}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    deliveryMethod === "standard"
+                      ? "bg-[#F8F4EC] border-[#D4AF37] shadow-xs"
+                      : "bg-[#FAF9F6] border-[#EAE5DF]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#2C2A29]">Standard Insured Delivery</span>
+                    <span className="text-xs font-bold text-emerald-800">
+                      {isFreeStandard ? "FREE" : "₹79"}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#6E6A64] mt-1">3–5 Business Days • BlueDart Air</p>
+                </div>
+
+                <div
+                  onClick={() => setDeliveryMethod("express")}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    deliveryMethod === "express"
+                      ? "bg-[#F8F4EC] border-[#D4AF37] shadow-xs"
+                      : "bg-[#FAF9F6] border-[#EAE5DF]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#2C2A29]">Express Priority Air</span>
+                    <span className="text-xs font-bold text-[#9A7B2C]">₹99</span>
+                  </div>
+                  <p className="text-[11px] text-[#6E6A64] mt-1">1–2 Business Days • Fast-Track</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Method Selector */}
+            <div className="pt-2">
+              <h4 className="font-serif text-sm font-semibold text-[#2C2A29] mb-2.5">
+                Payment Option
+              </h4>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {[
+                  { id: "upi", label: "Instant UPI", sub: "GPay, PhonePe", icon: <Smartphone size={16} /> },
+                  { id: "cards", label: "Cards", sub: "Visa, RuPay", icon: <CreditCard size={16} /> },
+                  { id: "netbanking", label: "NetBanking", sub: "Major Banks", icon: <Building2 size={16} /> },
+                  { id: "cod", label: "Cash on Delivery", sub: "COD Available", icon: <Banknote size={16} /> },
+                ].map((pm) => {
+                  const isSelected = paymentMethod === pm.id;
+                  return (
+                    <div
+                      key={pm.id}
+                      onClick={() => setPaymentMethod(pm.id as any)}
+                      className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                        isSelected
+                          ? "bg-[#F8F4EC] border-[#D4AF37] shadow-xs"
+                          : "bg-[#FAF9F6] border-[#EAE5DF]"
+                      }`}
                     >
-                      {discountCode ? "Applied" : "Apply"}
-                    </button>
-                  </div>
-                  {discountError && <p className="text-red-500 text-xs mt-2">{discountError}</p>}
-                </div>
-
-                <div className="flex justify-between items-end">
-                  <span className="text-sm font-semibold uppercase tracking-widest">Total</span>
-                  <div className="text-right">
-                    <span className="text-xs text-primary/40 block">INR</span>
-                    <span className="text-2xl font-medium">₹{finalTotal.toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-
+                      <div className={isSelected ? "text-[#9A7B2C]" : "text-[#6E6A64]"}>{pm.icon}</div>
+                      <span className="text-xs font-bold text-[#2C2A29]">{pm.label}</span>
+                      <span className="text-[9px] text-[#6E6A64]">{pm.sub}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
           </div>
-        )}
+
+          {/* =========================================================
+              RIGHT COLUMN: ORDER SUMMARY (5 cols)
+          ========================================================= */}
+          <div className="lg:col-span-5 p-6 sm:p-10 bg-[#FAF9F6] flex flex-col justify-between space-y-6">
+            <div className="space-y-5">
+              <h3 className="font-serif text-lg font-bold text-[#2C2A29] pb-3 border-b border-[#EAE5DF]">
+                Order Summary ({totalQuantity} items)
+              </h3>
+
+              {/* Items List */}
+              <div className="max-h-64 overflow-y-auto space-y-3 pr-1">
+                {cart.length === 0 ? (
+                  <p className="text-xs text-[#6E6A64]">Your bag is currently empty.</p>
+                ) : (
+                  cart.map((item) => (
+                    <div key={item.cartKey || item.id} className="flex items-center gap-3 text-xs">
+                      <div className="w-13 h-13 rounded-xl bg-white border border-[#EAE5DF] overflow-hidden relative flex-shrink-0">
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <h4 className="font-semibold text-[#2C2A29] truncate">{item.name}</h4>
+                        <span className="text-[10px] text-[#6E6A64]">
+                          Qty: {item.quantity} • {item.selectedBeadSize || "8mm"}
+                        </span>
+                      </div>
+                      <span className="font-bold text-[#2C2A29] flex-shrink-0">
+                        ₹{((item.salePrice || item.price) * item.quantity).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Promo Code Input */}
+              <form onSubmit={handleApplyCoupon} className="flex gap-2 pt-2">
+                <input
+                  type="text"
+                  placeholder="Promo Code (RIYA15)"
+                  value={couponCodeInput}
+                  onChange={(e) => setCouponCodeInput(e.target.value)}
+                  className="flex-grow px-3.5 py-2 text-xs rounded-xl bg-white border border-[#EAE5DF] text-[#2C2A29] uppercase focus:outline-none focus:border-[#D4AF37]"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider text-[#2C2A29] btn-pearl-gold"
+                >
+                  Apply
+                </button>
+              </form>
+
+              {/* Price Calculation */}
+              <div className="pt-3 border-t border-[#EAE5DF] space-y-2 text-xs text-[#6E6A64]">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span className="text-[#2C2A29] font-semibold">₹{rawSubtotal.toLocaleString("en-IN")}</span>
+                </div>
+
+                {tieredDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-800 font-semibold">
+                    <span>Buy 2 Get 15% Off (Tiered)</span>
+                    <span>-₹{tieredDiscount.toLocaleString("en-IN")}</span>
+                  </div>
+                )}
+
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-800 font-semibold">
+                    <span>Promo Discount ({appliedCoupon})</span>
+                    <span>-₹{couponDiscount.toLocaleString("en-IN")}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between">
+                  <span>Air Delivery</span>
+                  <span>
+                    {deliveryFee === 0 ? (
+                      <strong className="text-emerald-800">FREE</strong>
+                    ) : (
+                      `₹${deliveryFee}`
+                    )}
+                  </span>
+                </div>
+
+                <div className="pt-3 border-t border-[#EAE5DF] flex justify-between text-base font-bold text-[#2C2A29]">
+                  <span>Total Amount:</span>
+                  <span className="text-2xl text-[#2C2A29]">
+                    ₹{grandTotal.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Action */}
+            <div className="space-y-3 pt-4 border-t border-[#EAE5DF]">
+              <button
+                type="submit"
+                form="standalone-checkout-form"
+                disabled={loading || cart.length === 0}
+                className="w-full py-4 px-6 rounded-full text-xs font-semibold tracking-wider uppercase text-[#2C2A29] btn-gold-shimmer flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
+              >
+                {loading ? (
+                  <span>Processing...</span>
+                ) : (
+                  <>
+                    <Sparkles size={16} className="text-[#2C2A29]" />
+                    <span>Place Order • ₹{grandTotal.toLocaleString("en-IN")}</span>
+                    <ArrowRight size={14} />
+                  </>
+                )}
+              </button>
+
+              <div className="p-3 rounded-2xl bg-white border border-[#EAE5DF] flex items-center justify-center gap-2 text-[10px] text-[#6E6A64]">
+                <ShieldCheck size={14} className="text-[#D4AF37]" />
+                <span>256-Bit SSL Encrypted • Lab Certificate Included</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
     </div>
