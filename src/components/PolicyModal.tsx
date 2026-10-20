@@ -13,7 +13,7 @@ export default function PolicyModal() {
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden"
+        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="policy-modal-title"
@@ -27,14 +27,16 @@ export default function PolicyModal() {
           onClick={closePolicyModal}
         />
 
-        {/* Modal Window */}
+        {/* Modal Window: Native Bottom Sheet on Mobile */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          initial={{ opacity: 0, y: 35 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 35 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative w-full max-w-2xl bg-[#FFFFFF] rounded-3xl shadow-[0_20px_50px_rgba(212,175,55,0.18)] border border-[#EAE5DF] z-10 max-h-[85vh] flex flex-col overflow-hidden"
+          className="relative w-full max-w-2xl bg-[#FFFFFF] rounded-t-[28px] sm:rounded-3xl shadow-[0_20px_50px_rgba(212,175,55,0.18)] border-t sm:border border-[#EAE5DF] z-10 max-h-[88dvh] sm:max-h-[85vh] flex flex-col overflow-hidden pb-safe sm:pb-0"
         >
+          {/* Mobile Sheet Drag Pill Handle */}
+          <div className="w-12 h-1.5 bg-[#EAE5DF] rounded-full mx-auto mt-3 mb-1 sm:hidden flex-shrink-0" />
           {/* Header */}
           <div className="p-5 sm:p-6 border-b border-[#EAE5DF] bg-[#FAF9F6] flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">

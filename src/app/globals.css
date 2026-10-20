@@ -50,6 +50,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -279,12 +281,35 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .touch-press:active {
-  transform: scale(0.97);
-  transition: transform 0.1s ease;
+  transform: scale(0.96);
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media screen and (max-width: 640px) {
+/* Mobile-First Safe Area Insets & Dynamic Viewport Helpers */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 16px);
+}
+
+.mobile-scroll-snap {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-scroll-snap > * {
+  scroll-snap-align: start;
+}
+
+/* iOS input zoom prevention & mobile touch target minimum */
+@media screen and (max-width: 768px) {
   input, select, textarea {
     font-size: 16px !important;
+  }
+  
+  button, a {
+    min-height: 38px;
   }
 }

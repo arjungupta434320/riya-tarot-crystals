@@ -16,7 +16,9 @@ import {
   Smartphone, 
   Building2, 
   Banknote,
-  RotateCcw
+  RotateCcw,
+  ChevronDown,
+  ShoppingBag
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -69,6 +71,7 @@ export default function CheckoutModal() {
 
   // Validation Touched States for modern feedback
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
 
   if (!isCheckoutModalOpen) return null;
 
@@ -166,7 +169,7 @@ export default function CheckoutModal() {
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden"
+        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="checkout-title"
@@ -180,14 +183,17 @@ export default function CheckoutModal() {
           onClick={handleClose}
         />
 
-        {/* Modal Window: Split-Screen Light Theme */}
+        {/* Modal Window: Split-Screen Light Theme (Bottom Sheet on Mobile) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 15 }}
+          initial={{ opacity: 0, y: 35 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 35 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative w-full max-w-5xl bg-[#FFFFFF] rounded-3xl shadow-[0_25px_60px_rgba(212,175,55,0.22)] border border-[#EAE5DF] z-10 max-h-[92vh] flex flex-col overflow-hidden"
+          className="relative w-full max-w-5xl bg-[#FFFFFF] rounded-t-[28px] sm:rounded-3xl shadow-[0_25px_60px_rgba(212,175,55,0.22)] border-t sm:border border-[#EAE5DF] z-10 max-h-[94dvh] sm:max-h-[92vh] flex flex-col overflow-hidden pb-safe sm:pb-0"
         >
+          {/* Mobile Sheet Drag Indicator */}
+          <div className="w-12 h-1.5 bg-[#EAE5DF] rounded-full mx-auto mt-3 mb-1 sm:hidden flex-shrink-0" />
+
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-[#EAE5DF] bg-[#FAF9F6] flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">
@@ -221,8 +227,48 @@ export default function CheckoutModal() {
                 {/* =========================================================
                     LEFT COLUMN: PREMIUM FLOATING-LABEL FORM & OPTIONS (7 cols)
                 ========================================================= */}
-                <div className="lg:col-span-7 p-5 sm:p-7 space-y-6 border-b lg:border-b-0 lg:border-r border-[#EAE5DF]">
+                <div className="lg:col-span-7 p-4 sm:p-7 space-y-5 sm:space-y-6 border-b lg:border-b-0 lg:border-r border-[#EAE5DF]">
                   
+                  {/* Mobile-Only Collapsible Order Summary Bar */}
+                  <div className="lg:hidden p-3.5 rounded-2xl bg-[#F8F4EC] border border-[#D4AF37]/40">
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileSummaryOpen(!isMobileSummaryOpen)}
+                      className="w-full flex items-center justify-between text-xs cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <ShoppingBag size={15} className="text-[#D4AF37]" />
+                        <span className="font-semibold text-[#2C2A29]">
+                          {isMobileSummaryOpen ? "Hide Order Summary" : "Show Order Summary"}
+                        </span>
+                        <span className="text-[#9A7B2C] font-bold">({totalQuantity} items)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 font-bold text-[#2C2A29]">
+                        <span>₹{grandTotal.toLocaleString("en-IN")}</span>
+                        <ChevronDown size={14} className={`transition-transform duration-200 text-[#D4AF37] ${isMobileSummaryOpen ? "rotate-180" : ""}`} />
+                      </div>
+                    </button>
+
+                    {isMobileSummaryOpen && (
+                      <div className="pt-3 mt-3 border-t border-[#EAE5DF] space-y-2 text-xs">
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                          {cart.map((item) => (
+                            <div key={item.cartKey || item.id} className="flex items-center justify-between gap-2 text-[11px]">
+                              <span className="text-[#2C2A29] truncate flex-1">{item.name} × {item.quantity} ({item.selectedBeadSize || "8mm"})</span>
+                              <span className="font-bold text-[#2C2A29] flex-shrink-0">₹{((item.salePrice || item.price) * item.quantity).toLocaleString("en-IN")}</span>
+                            </div>
+                          ))}
+                        </div>
+                        {totalDiscount > 0 && (
+                          <div className="pt-2 border-t border-[#EAE5DF] flex justify-between text-[#6E6A64] text-[11px]">
+                            <span>Savings Applied:</span>
+                            <span className="text-emerald-700 font-semibold">-₹{totalDiscount.toLocaleString("en-IN")}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Delivery Address Form with Floating Labels */}
                   <div>
                     <h4 className="font-serif text-sm font-semibold text-[#2C2A29] mb-3 flex items-center gap-2">

@@ -49,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cinzel.variable} ${plusJakartaSans.variable} font-sans antialiased min-h-screen flex flex-col bg-[#FAF9F6] text-[#2C2A29] pb-24 md:pb-0`}>
+      <body className={`${cinzel.variable} ${plusJakartaSans.variable} font-sans antialiased min-h-[100dvh] flex flex-col bg-[#FAF9F6] text-[#2C2A29] pb-28 md:pb-0`}>
         <AuthProvider>
           <Navbar />
           <main className="flex-grow">

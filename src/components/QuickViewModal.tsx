@@ -50,7 +50,7 @@ export default function QuickViewModal() {
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-6 overflow-hidden"
+        className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="quickview-title"
@@ -64,14 +64,17 @@ export default function QuickViewModal() {
           onClick={closeQuickView}
         />
 
-        {/* Modal Window */}
+        {/* Modal Window: Native Bottom Sheet on Mobile, Centered Modal on Tablet/Desktop */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative w-full max-w-4xl bg-[#FFFFFF] rounded-3xl shadow-[0_20px_50px_rgba(212,175,55,0.2)] border border-[#EAE5DF] z-10 max-h-[90vh] flex flex-col md:flex-row overflow-hidden"
+          className="relative w-full max-w-4xl bg-[#FFFFFF] rounded-t-[28px] sm:rounded-3xl shadow-[0_20px_50px_rgba(212,175,55,0.2)] border-t sm:border border-[#EAE5DF] z-10 max-h-[90dvh] sm:max-h-[90vh] flex flex-col md:flex-row overflow-hidden pb-safe sm:pb-0"
         >
+          {/* Mobile Sheet Drag Pill Handle */}
+          <div className="w-12 h-1.5 bg-[#EAE5DF] rounded-full mx-auto mt-3 mb-1 sm:hidden flex-shrink-0" />
+
           {/* Close Button */}
           <button
             onClick={closeQuickView}

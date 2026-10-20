@@ -322,7 +322,7 @@ export default function HomePage() {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden mb-6"
               >
-                <div className="p-2 sm:p-2.5 rounded-2xl bg-[#FFFFFF] border border-[#D4AF37]/40 max-w-xl mx-auto flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs">
+                <div className="p-1.5 sm:p-2.5 rounded-2xl bg-[#FFFFFF] border border-[#D4AF37]/40 max-w-xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar shadow-xs">
                   {braceletSubFilters.map((sub) => {
                     const isSubActive = activeSubFilter === sub.id;
                     return (
@@ -330,7 +330,7 @@ export default function HomePage() {
                         key={sub.id}
                         type="button"
                         onClick={() => setActiveSubFilter(sub.id)}
-                        className={`px-3 sm:px-4 py-1.5 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                        className={`px-3 sm:px-4 py-1.5 rounded-xl text-[11px] font-semibold whitespace-nowrap flex-shrink-0 transition-all cursor-pointer ${
                           isSubActive
                             ? "bg-[#F8F4EC] text-[#9A7B2C] border border-[#D4AF37]/50 shadow-xs font-bold"
                             : "text-[#6E6A64] hover:text-[#2C2A29]"

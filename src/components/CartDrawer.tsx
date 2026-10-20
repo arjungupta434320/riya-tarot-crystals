@@ -100,13 +100,13 @@ export default function CartDrawer() {
             onClick={toggleCart}
           />
 
-          {/* Slide-Over Drawer in Warm Alabaster & White */}
+          {/* Slide-Over Drawer in Warm Alabaster & White (Dynamic Viewport Height for Mobile) */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-full sm:w-[440px] bg-[#FFFFFF] shadow-2xl z-10 flex flex-col border-l border-[#EAE5DF]"
+            className="fixed top-0 right-0 h-[100dvh] w-full sm:w-[440px] bg-[#FFFFFF] shadow-2xl z-10 flex flex-col border-l border-[#EAE5DF]"
           >
             {/* Header */}
             <div className="p-5 sm:p-6 border-b border-[#EAE5DF] bg-[#FAF9F6] flex items-center justify-between flex-shrink-0">
@@ -397,9 +397,9 @@ export default function CartDrawer() {
               )}
             </div>
 
-            {/* Footer Summary & Checkout Button */}
+            {/* Footer Summary & Checkout Button with Safe Area Padding */}
             {activeDrawerTab === "cart" && cart.length > 0 && (
-              <div className="p-5 sm:p-6 border-t border-[#EAE5DF] bg-[#FAF9F6] space-y-3 flex-shrink-0">
+              <div className="p-4 sm:p-6 pb-safe sm:pb-6 border-t border-[#EAE5DF] bg-[#FAF9F6] space-y-3 flex-shrink-0">
                 <div className="space-y-1.5 text-xs text-[#6E6A64]">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
