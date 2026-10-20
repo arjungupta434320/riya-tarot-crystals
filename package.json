@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "deploy": "next build && npx wrangler pages deploy out",
+    "deploy": "next build && npx wrangler pages deploy out --project-name=riya-tarot-crystals",
     "start": "next start",
     "lint": "eslint"
   },
