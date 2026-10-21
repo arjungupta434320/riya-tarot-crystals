@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { fetchProducts } from "@/data/products";
+import { fetchProducts, fallbackProducts } from "@/data/products";
 import { useStore, Product } from "@/store/useStore";
 import { 
   Star, 
@@ -64,7 +64,7 @@ function ShopContent() {
   const initialSearch = searchParams.get("search") || "";
   const initialChakra = searchParams.get("chakra") || "all";
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(fallbackProducts);
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeSubCategory, setActiveSubCategory] = useState("all");
   const [activePurpose, setActivePurpose] = useState("all");
