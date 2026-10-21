@@ -189,9 +189,26 @@ export default async function BlogPostPage({
           </div>
         </div>
 
+        {/* Collapsible Mobile Table of Contents */}
+        <details className="mb-8 p-4 sm:p-5 rounded-2xl bg-white border border-[#EFE9E2] shadow-xs cursor-pointer group">
+          <summary className="font-serif text-sm font-bold text-[#2B1B3D] flex items-center justify-between list-none">
+            <span className="flex items-center gap-2">
+              <BookOpen size={16} className="text-[#C9A24D]" />
+              <span>Sacred Guide Chapters & Index</span>
+            </span>
+            <span className="text-[11px] text-[#7B4FC9] group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div className="pt-3 border-t border-[#EFE9E2] mt-3 space-y-1.5 text-xs text-[#635572]">
+            <p className="font-medium">1. Astrological & Energetic Origins</p>
+            <p className="font-medium">2. Metaphysical & Chakra Healing Powers</p>
+            <p className="font-medium">3. Sacred Consecration & Lunar Charging Rituals</p>
+            <p className="font-medium">4. How to Wear & Maintain Gemstone Frequency</p>
+          </div>
+        </details>
+
         {/* Article Body Content */}
-        <div className="prose prose-sm sm:prose-base max-w-none text-[#2B1B3D] font-sans leading-relaxed space-y-6">
-          <div className="whitespace-pre-line text-xs sm:text-base leading-relaxed text-[#2B1B3D]">
+        <div className="prose prose-sm sm:prose-base max-w-none text-[#2B1B3D] font-sans leading-relaxed space-y-6 overflow-x-auto">
+          <div className="whitespace-pre-line text-base sm:text-lg leading-relaxed text-[#2B1B3D]">
             {post.content}
           </div>
         </div>

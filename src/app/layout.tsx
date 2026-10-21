@@ -60,14 +60,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${cinzel.variable} ${plusJakartaSans.variable} font-sans antialiased min-h-[100dvh] flex flex-col bg-[#FBF8F3] text-[#2B1B3D] pb-24 md:pb-0`}>
+    <html lang="en" className="overflow-x-hidden max-w-full w-full">
+      <body className={`${cinzel.variable} ${plusJakartaSans.variable} font-sans antialiased min-h-[100dvh] flex flex-col bg-[#FBF8F3] text-[#2B1B3D] pb-24 md:pb-0 overflow-x-hidden max-w-full w-full`}>
         <SmoothScrollProvider>
           <Preloader />
           <CustomCursor />
           <AuthProvider>
             <Navbar />
-            <main className="flex-grow">
+            <main className="flex-grow w-full max-w-full overflow-x-hidden">
               {children}
             </main>
             <Footer />

@@ -313,6 +313,8 @@ export default function CheckoutPage() {
               <div className="floating-input-group">
                 <input
                   id="checkout_name"
+                  name="name"
+                  autoComplete="name"
                   type="text"
                   required
                   placeholder=" "
@@ -328,6 +330,9 @@ export default function CheckoutPage() {
                 <div className="floating-input-group">
                   <input
                     id="checkout_phone"
+                    name="tel"
+                    autoComplete="tel"
+                    inputMode="tel"
                     type="tel"
                     required
                     maxLength={10}
@@ -342,6 +347,8 @@ export default function CheckoutPage() {
                 <div className="floating-input-group">
                   <input
                     id="checkout_email"
+                    name="email"
+                    autoComplete="email"
                     type="email"
                     required
                     placeholder=" "
@@ -357,6 +364,8 @@ export default function CheckoutPage() {
               <div className="floating-input-group">
                 <input
                   id="checkout_address"
+                  name="address"
+                  autoComplete="street-address"
                   type="text"
                   required
                   placeholder=" "
@@ -371,6 +380,8 @@ export default function CheckoutPage() {
               <div className="floating-input-group">
                 <input
                   id="checkout_landmark"
+                  name="landmark"
+                  autoComplete="address-line2"
                   type="text"
                   placeholder=" "
                   value={landmark}
@@ -384,6 +395,10 @@ export default function CheckoutPage() {
                 <div className="floating-input-group">
                   <input
                     id="checkout_pin"
+                    name="postal-code"
+                    autoComplete="postal-code"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     type="text"
                     required
                     maxLength={6}
@@ -398,6 +413,8 @@ export default function CheckoutPage() {
                 <div className="floating-input-group">
                   <input
                     id="checkout_city"
+                    name="city"
+                    autoComplete="address-level2"
                     type="text"
                     required
                     placeholder=" "
@@ -411,6 +428,8 @@ export default function CheckoutPage() {
                 <div className="floating-input-group">
                   <select
                     id="checkout_state"
+                    name="state"
+                    autoComplete="address-level1"
                     value={stateName}
                     onChange={(e) => setStateName(e.target.value)}
                   >
@@ -661,6 +680,26 @@ export default function CheckoutPage() {
 
         </div>
 
+      </div>
+
+      {/* Mobile Sticky Pay Bar */}
+      <div 
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-[#EFE9E2] p-3 px-4 shadow-[0_-8px_30px_rgba(43,27,61,0.12)] flex items-center justify-between gap-3"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}
+      >
+        <div>
+          <span className="text-[10px] text-[#635572] uppercase font-semibold block">Total Due</span>
+          <span className="text-lg font-bold text-[#2B1B3D]">₹{grandTotal.toLocaleString("en-IN")}</span>
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="flex-1 py-3 px-5 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst flex items-center justify-center gap-1.5 cursor-pointer shadow-md disabled:opacity-60"
+        >
+          <Lock size={13} className="text-[#C9A24D]" />
+          <span>{loading ? "Processing..." : "Place Sacred Order"}</span>
+          <ArrowRight size={13} />
+        </button>
       </div>
     </div>
   );

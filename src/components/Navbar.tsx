@@ -14,7 +14,8 @@ import {
   BookOpen,
   Compass, 
   Tag, 
-  Truck
+  Truck,
+  ChevronDown
 } from "lucide-react";
 import { useStore, Product } from "@/store/useStore";
 import { fetchProducts } from "@/data/products";
@@ -23,6 +24,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isBraceletsOpen, setIsBraceletsOpen] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -62,8 +64,8 @@ export default function Navbar() {
   return (
     <>
       {/* 1. TOP ANNOUNCEMENT MARQUEE */}
-      <div className="w-full bg-[#F7EFE2] text-[#2B1B3D] py-2 px-4 border-b border-[#EFE9E2] overflow-hidden relative z-50">
-        <div className="flex overflow-x-hidden">
+      <div className="w-full max-w-full bg-[#F7EFE2] text-[#2B1B3D] py-2 px-2 sm:px-4 border-b border-[#EFE9E2] overflow-hidden relative z-50 min-w-0">
+        <div className="w-full max-w-full overflow-hidden min-w-0 flex">
           <div className="animate-marquee whitespace-nowrap flex items-center gap-10 text-[11px] sm:text-xs font-medium tracking-wide">
             <span className="flex items-center gap-2">
               <Sparkles size={12} className="text-[#C9A24D]" />
@@ -91,13 +93,13 @@ export default function Navbar() {
             : "bg-[#FBF8F3]/95 backdrop-blur-md py-4 border-b border-[#EFE9E2]"
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
+        <div className="container mx-auto px-2 sm:px-6 flex items-center justify-between min-w-0 gap-2">
           
           {/* Left: Mobile Toggle & Brand Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
             <button
               type="button"
-              className="lg:hidden p-2 rounded-xl text-[#2B1B3D] hover:bg-[#F6F2EA] transition-colors cursor-pointer"
+              className="lg:hidden w-11 h-11 rounded-xl text-[#2B1B3D] hover:bg-[#F6F2EA] transition-colors cursor-pointer flex items-center justify-center flex-shrink-0"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle navigation menu"
             >
@@ -105,20 +107,20 @@ export default function Navbar() {
             </button>
 
             {/* Bespoke Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-[#FBF8F3] via-[#F6F2EA] to-white border border-[#C9A24D]/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
-                <svg viewBox="0 0 44 44" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-[#FBF8F3] via-[#F6F2EA] to-white border border-[#C9A24D]/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
+                <svg viewBox="0 0 44 44" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22 3L24.5 14.5L36 17L24.5 19.5L22 31L19.5 19.5L8 17L19.5 14.5L22 3Z" fill="#FBF8F3" stroke="#C9A24D" strokeWidth="1.3" />
                   <polygon points="22,12 26.5,17 22,22 17.5,17" fill="#CDB9F5" fillOpacity="0.4" stroke="#7B4FC9" strokeWidth="1.2" />
                   <line x1="22" y1="12" x2="22" y2="22" stroke="#C9A24D" strokeWidth="1" />
                 </svg>
               </div>
 
-              <div className="flex flex-col min-w-0">
-                <span className="font-serif text-base sm:text-lg tracking-wider text-[#2B1B3D] font-bold leading-none uppercase group-hover:text-[#7B4FC9] transition-colors truncate">
+              <div className="flex flex-col min-w-0 overflow-hidden">
+                <span className="font-serif text-sm sm:text-lg tracking-wider text-[#2B1B3D] font-bold leading-none uppercase group-hover:text-[#7B4FC9] transition-colors truncate">
                   RIYA TAROT CRYSTALS
                 </span>
-                <span className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-[#8E6D24] font-semibold mt-0.5 truncate">
+                <span className="text-[8px] sm:text-[10px] tracking-[0.15em] uppercase text-[#8E6D24] font-semibold mt-0.5 truncate hidden xs:block">
                   HEALED • ENERGIZED • AUTHENTIC
                 </span>
               </div>
@@ -169,14 +171,14 @@ export default function Navbar() {
           </nav>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {/* Search Trigger */}
             <button
               onClick={() => {
                 setIsSearchOpen(!isSearchOpen);
                 setTimeout(() => searchInputRef.current?.focus(), 100);
               }}
-              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors cursor-pointer"
+              className="w-11 h-11 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors cursor-pointer flex items-center justify-center min-w-[44px] min-h-[44px]"
               aria-label="Search crystals"
             >
               <Search size={19} />
@@ -188,12 +190,12 @@ export default function Navbar() {
                 setDrawerTab("wishlist");
                 toggleCart();
               }}
-              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors relative cursor-pointer"
+              className="w-11 h-11 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors relative cursor-pointer flex items-center justify-center min-w-[44px] min-h-[44px]"
               aria-label="Open wishlist"
             >
               <Heart size={19} />
               {wishlist.length > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#FDF2F4] text-[#7B4FC9] text-[10px] font-bold border border-[#F4C6D0] flex items-center justify-center">
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#FDF2F4] text-[#7B4FC9] text-[10px] font-bold border border-[#F4C6D0] flex items-center justify-center">
                   {wishlist.length}
                 </span>
               )}
@@ -205,12 +207,12 @@ export default function Navbar() {
                 setDrawerTab("cart");
                 toggleCart();
               }}
-              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors relative cursor-pointer"
+              className="w-11 h-11 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors relative cursor-pointer flex items-center justify-center min-w-[44px] min-h-[44px]"
               aria-label="Open cart"
             >
               <ShoppingBag size={19} />
               {totalCartCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#7B4FC9] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#7B4FC9] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
                   {totalCartCount}
                 </span>
               )}
@@ -338,34 +340,108 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Navigation Links */}
-              <div className="flex-grow overflow-y-auto p-5 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E6D24] block mb-2">
-                  Collections & Journal
+              {/* Navigation Links with Category Accordions */}
+              <div className="flex-grow overflow-y-auto p-4 sm:p-5 space-y-2.5">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E6D24] block mb-2 px-1">
+                  Sacred Collections & Navigation
                 </span>
 
+                {/* All Collections Link */}
                 <Link
                   href="/shop"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                  className="flex items-center justify-between p-3.5 min-h-[48px] rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D] active:scale-[0.99] transition-all"
                 >
                   <span className="font-semibold text-xs">All Collections</span>
                   <ArrowRight size={14} className="text-[#C9A24D]" />
                 </Link>
 
+                {/* Bracelets Accordion */}
+                <div className="rounded-2xl border border-[#EFE9E2] bg-[#FAF8F3] overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setIsBraceletsOpen(!isBraceletsOpen)}
+                    className="w-full flex items-center justify-between p-3.5 min-h-[48px] text-left text-[#2B1B3D] font-semibold text-xs cursor-pointer select-none"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Sparkles size={14} className="text-[#C9A24D]" />
+                      <span>Healed Bracelets</span>
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`text-[#635572] transition-transform duration-200 ${
+                        isBraceletsOpen ? "rotate-180 text-[#7B4FC9]" : ""
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {isBraceletsOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="border-t border-[#EFE9E2] bg-white px-3 py-2 space-y-1"
+                      >
+                        <Link
+                          href="/shop?category=Heal+Energized+Bracelets"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs text-[#2B1B3D] hover:bg-[#F5F0FD] hover:text-[#7B4FC9] transition-colors"
+                        >
+                          <span>All Healed Bracelets</span>
+                          <span className="text-[10px] text-[#8E6D24]">View all →</span>
+                        </Link>
+                        <Link
+                          href="/shop?category=Heal+Energized+Bracelets&subCategory=chakra-bracelets"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs text-[#635572] hover:bg-[#F5F0FD] hover:text-[#7B4FC9] transition-colors"
+                        >
+                          <span>• Chakra Bracelets (7 Energy Vortices)</span>
+                        </Link>
+                        <Link
+                          href="/shop?category=Heal+Energized+Bracelets&subCategory=mixed-bracelets"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs text-[#635572] hover:bg-[#F5F0FD] hover:text-[#7B4FC9] transition-colors"
+                        >
+                          <span>• Mixed (Mixel) Synergy Bracelets</span>
+                        </Link>
+                        <Link
+                          href="/shop?category=Heal+Energized+Bracelets&subCategory=kundli-bracelets"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs text-[#635572] hover:bg-[#F5F0FD] hover:text-[#7B4FC9] transition-colors"
+                        >
+                          <span>• Kundli & Vedic Rashi Bracelets</span>
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Clusters */}
                 <Link
-                  href="/shop?category=Heal+Energized+Bracelets"
+                  href="/shop?category=Raw+Crystal+Clusters"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                  className="flex items-center justify-between p-3.5 min-h-[48px] rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D] active:scale-[0.99] transition-all"
                 >
-                  <span className="font-semibold text-xs">Healed Bracelets</span>
+                  <span className="font-semibold text-xs">Raw Clusters & Geodes</span>
                   <ArrowRight size={14} className="text-[#C9A24D]" />
                 </Link>
 
+                {/* Pendants */}
+                <Link
+                  href="/shop?category=Sacred+Crystal+Pendants"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3.5 min-h-[48px] rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D] active:scale-[0.99] transition-all"
+                >
+                  <span className="font-semibold text-xs">Sacred Crystal Pendants</span>
+                  <ArrowRight size={14} className="text-[#C9A24D]" />
+                </Link>
+
+                {/* Crystal Quiz Highlight */}
                 <Link
                   href="/quiz"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#F5F0FD] border border-[#7B4FC9]/30 text-[#7B4FC9]"
+                  className="flex items-center justify-between p-3.5 min-h-[48px] rounded-2xl bg-[#F5F0FD] border border-[#7B4FC9]/30 text-[#7B4FC9] active:scale-[0.99] transition-all"
                 >
                   <span className="font-semibold text-xs flex items-center gap-1.5">
                     <Sparkles size={13} className="text-[#C9A24D]" />
@@ -374,10 +450,11 @@ export default function Navbar() {
                   <ArrowRight size={14} className="text-[#7B4FC9]" />
                 </Link>
 
+                {/* Blog & Journal */}
                 <Link
                   href="/blog"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                  className="flex items-center justify-between p-3.5 min-h-[48px] rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D] active:scale-[0.99] transition-all"
                 >
                   <span className="font-semibold text-xs flex items-center gap-1.5">
                     <BookOpen size={13} className="text-[#C9A24D]" />
@@ -386,19 +463,21 @@ export default function Navbar() {
                   <ArrowRight size={14} className="text-[#C9A24D]" />
                 </Link>
 
+                {/* About & Sourcing */}
                 <Link
                   href="/about"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                  className="flex items-center justify-between p-3.5 min-h-[48px] rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D] active:scale-[0.99] transition-all"
                 >
                   <span className="font-semibold text-xs">About Riya & Sourcing</span>
                   <ArrowRight size={14} className="text-[#C9A24D]" />
                 </Link>
 
+                {/* Track Order */}
                 <Link
                   href="/track"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                  className="flex items-center justify-between p-3.5 min-h-[48px] rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D] active:scale-[0.99] transition-all"
                 >
                   <span className="font-semibold text-xs flex items-center gap-1.5">
                     <Truck size={13} />

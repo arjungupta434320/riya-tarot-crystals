@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { 
   X, 
@@ -40,6 +40,14 @@ export default function CartDrawer() {
   } = useStore();
 
   const [couponInput, setCouponInput] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
   const rawSubtotal = cart.reduce(
@@ -100,16 +108,21 @@ export default function CartDrawer() {
             onClick={toggleCart}
           />
 
-          {/* Slide-Over Drawer in Warm Alabaster & White (Dynamic Viewport Height for Mobile) */}
+          {/* Responsive Drawer: Bottom-sheet slide-up on mobile, right slide-over on desktop */}
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            initial={isMobile ? { y: "100%" } : { x: "100%" }}
+            animate={isMobile ? { y: 0 } : { x: 0 }}
+            exit={isMobile ? { y: "100%" } : { x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed top-0 right-0 h-[100dvh] w-full sm:w-[440px] bg-[#FFFFFF] shadow-2xl z-10 flex flex-col border-l border-[#EAE5DF]"
+            className="fixed bottom-0 right-0 max-h-[92dvh] sm:max-h-none sm:top-0 h-full w-full sm:w-[440px] bg-[#FFFFFF] rounded-t-3xl sm:rounded-none shadow-2xl z-10 flex flex-col border-t sm:border-t-0 sm:border-l border-[#EAE5DF]"
           >
+            {/* Mobile Drag Indicator */}
+            <div className="sm:hidden w-full pt-2.5 pb-1 flex justify-center bg-[#FAF9F6] rounded-t-3xl">
+              <div className="w-10 h-1 bg-[#D4AF37]/40 rounded-full" />
+            </div>
+
             {/* Header */}
-            <div className="p-5 sm:p-6 border-b border-[#EAE5DF] bg-[#FAF9F6] flex items-center justify-between flex-shrink-0">
+            <div className="p-4 sm:p-6 border-b border-[#EAE5DF] bg-[#FAF9F6] flex items-center justify-between flex-shrink-0">
               <div className="flex gap-6">
                 <button
                   onClick={() => setDrawerTab("cart")}

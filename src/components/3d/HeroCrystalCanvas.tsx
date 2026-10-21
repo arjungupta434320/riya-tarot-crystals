@@ -23,13 +23,15 @@ export function HeroCrystalCanvas() {
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.z = 4.2;
 
+    const isMobileDevice = window.innerWidth < 768;
+
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
-      antialias: true,
+      antialias: !isMobileDevice,
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobileDevice ? 1.0 : Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
     container.appendChild(renderer.domElement);
@@ -69,7 +71,7 @@ export function HeroCrystalCanvas() {
     crystalMesh.add(wireframe);
 
     // 3. Floating Sacred Sparkle Particles
-    const particleCount = 45;
+    const particleCount = isMobileDevice ? 20 : 45;
     const particleGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const scales = new Float32Array(particleCount);

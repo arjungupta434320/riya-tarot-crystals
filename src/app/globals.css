@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 :root {
   /* Strict Luxury Spiritual Light-Theme Palette */
   --bg-primary: #FBF8F3; /* Warm Ethereal Ivory */
@@ -315,7 +323,7 @@ html.lenis, html.lenis body {
   background: #FFFFFF;
   border: 1px solid #EFE9E2;
   color: #2B1B3D;
-  font-size: 0.925rem;
+  font-size: 1rem; /* 16px minimum prevents iOS Safari auto-zoom */
   transition: all 0.2s ease;
   outline: none;
 }

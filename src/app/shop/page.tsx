@@ -232,28 +232,30 @@ function ShopContent() {
         </div>
 
         {/* 1. Category Bar */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 justify-start sm:justify-center no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-          {mainCategories.map((cat) => {
-            const isActive = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  setActiveCategory(cat.id);
-                  if (cat.id !== "Heal Energized Bracelets") {
-                    setActiveSubCategory("all");
-                  }
-                }}
-                className={`px-4 sm:px-6 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border flex-shrink-0 cursor-pointer touch-press ${
-                  isActive
-                    ? "bg-[#7B4FC9] text-white border-[#7B4FC9] shadow-md font-bold"
-                    : "bg-white text-[#635572] border-[#EFE9E2] hover:border-[#C9A24D]/50 hover:text-[#2B1B3D]"
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
+        <div className="w-full max-w-full overflow-hidden mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 justify-start sm:justify-center no-scrollbar px-1">
+            {mainCategories.map((cat) => {
+              const isActive = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setActiveCategory(cat.id);
+                    if (cat.id !== "Heal Energized Bracelets") {
+                      setActiveSubCategory("all");
+                    }
+                  }}
+                  className={`px-4 sm:px-6 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border flex-shrink-0 cursor-pointer touch-press ${
+                    isActive
+                      ? "bg-[#7B4FC9] text-white border-[#7B4FC9] shadow-md font-bold"
+                      : "bg-white text-[#635572] border-[#EFE9E2] hover:border-[#C9A24D]/50 hover:text-[#2B1B3D]"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 2. Subcategory Bar (For Bracelets) */}
@@ -263,9 +265,9 @@ function ShopContent() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden mb-6"
+              className="overflow-hidden mb-5"
             >
-              <div className="p-1.5 sm:p-2 rounded-2xl bg-white border border-[#C9A24D]/35 max-w-xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar shadow-xs">
+              <div className="p-1.5 sm:p-2 rounded-2xl bg-white border border-[#C9A24D]/35 max-w-xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar shadow-xs px-2">
                 {braceletSubCategories.map((sub) => {
                   const isSubActive = activeSubCategory === sub.id;
                   return (
@@ -273,7 +275,7 @@ function ShopContent() {
                       key={sub.id}
                       type="button"
                       onClick={() => setActiveSubCategory(sub.id)}
-                      className={`px-3 sm:px-4 py-1.5 rounded-xl text-[11px] font-semibold whitespace-nowrap flex-shrink-0 transition-all cursor-pointer ${
+                      className={`px-3 sm:px-4 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap flex-shrink-0 transition-all cursor-pointer ${
                         isSubActive
                           ? "bg-[#F5F0FD] text-[#7B4FC9] border border-[#7B4FC9]/40 shadow-xs font-bold"
                           : "text-[#635572] hover:text-[#2B1B3D]"
@@ -288,8 +290,8 @@ function ShopContent() {
           )}
         </AnimatePresence>
 
-        {/* 3. Purpose Filter Chips */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-3 mb-6 justify-start lg:justify-center no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* 3. Purpose Filter Chips (Desktop & Tablet) */}
+        <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-3 mb-6 justify-start lg:justify-center no-scrollbar px-1">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E6D24] mr-1 flex-shrink-0">
             Intention:
           </span>
@@ -311,11 +313,10 @@ function ShopContent() {
           })}
         </div>
 
-        {/* 4. Search, Chakra & Sort Controls Bar */}
-        <div className="p-4 rounded-2xl bg-white border border-[#EFE9E2] mb-8 flex flex-col md:flex-row items-center justify-between gap-3 shadow-xs">
-          
+        {/* 4A. Desktop Controls Bar */}
+        <div className="hidden md:flex p-4 rounded-2xl bg-white border border-[#EFE9E2] mb-8 items-center justify-between gap-3 shadow-xs">
           {/* Search Input */}
-          <div className="relative w-full md:w-80">
+          <div className="relative w-80">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#635572]" />
             <input
               type="text"
@@ -327,8 +328,7 @@ function ShopContent() {
           </div>
 
           {/* Chakra Dropdown & Price & Sort */}
-          <div className="flex flex-wrap items-center justify-between md:justify-end gap-2.5 w-full md:w-auto text-xs">
-            {/* Chakra Selector */}
+          <div className="flex flex-wrap items-center justify-end gap-2.5 text-xs">
             <select
               value={activeChakra}
               onChange={(e) => setActiveChakra(e.target.value)}
@@ -341,7 +341,6 @@ function ShopContent() {
               ))}
             </select>
 
-            {/* Sort Selector */}
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -363,11 +362,173 @@ function ShopContent() {
               </button>
             )}
 
-            <span className="text-[#635572] text-[11px] pl-1 font-medium hidden sm:inline">
+            <span className="text-[#635572] text-[11px] pl-1 font-medium">
               Showing <strong className="text-[#2B1B3D] font-bold">{filteredProducts.length}</strong> gems
             </span>
           </div>
         </div>
+
+        {/* 4B. Mobile Controls Bar with Bottom-Sheet Trigger */}
+        <div className="md:hidden flex items-center gap-2 mb-6">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#635572]" />
+            <input
+              type="text"
+              placeholder="Search gemstone or intention..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-2.5 text-base sm:text-xs rounded-full bg-white border border-[#EFE9E2] text-[#2B1B3D] placeholder-[#9588A3] focus:outline-none focus:border-[#C9A24D] shadow-2xs"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsFilterDrawerOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white border border-[#EFE9E2] text-[#2B1B3D] text-xs font-semibold shadow-2xs cursor-pointer active:scale-95 transition-all min-h-[44px]"
+            aria-label="Open filter drawer"
+          >
+            <SlidersHorizontal size={15} className="text-[#7B4FC9]" />
+            <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-[#7B4FC9] text-white text-[10px] font-bold flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* 4C. Mobile Filter Bottom-Sheet Modal */}
+        <AnimatePresence>
+          {isFilterDrawerOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="md:hidden fixed inset-0 bg-[#2B1B3D]/50 backdrop-blur-xs z-[65]"
+                onClick={() => setIsFilterDrawerOpen(false)}
+              />
+
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 28, stiffness: 300 }}
+                className="md:hidden fixed bottom-0 left-0 right-0 max-h-[85dvh] bg-white rounded-t-3xl z-[70] shadow-2xl flex flex-col border-t border-[#EFE9E2]"
+                style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)" }}
+              >
+                {/* Drag Handle & Header */}
+                <div className="p-4 pb-2 border-b border-[#EFE9E2] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal size={16} className="text-[#7B4FC9]" />
+                    <h3 className="font-serif text-base font-bold text-[#2B1B3D]">
+                      Filter & Refine Gems
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="p-1.5 rounded-full hover:bg-[#F6F2EA] text-[#635572] cursor-pointer"
+                    aria-label="Close filters"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Filter Options Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                  {/* Sort Order */}
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#8E6D24] block mb-2">
+                      Sort Gems By
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {[
+                        { id: "featured", label: "Featured" },
+                        { id: "price-low", label: "Price: Low to High" },
+                        { id: "price-high", label: "Price: High to Low" },
+                        { id: "rating", label: "Highest Rated" },
+                      ].map((s) => (
+                        <button
+                          key={s.id}
+                          onClick={() => setSortBy(s.id)}
+                          className={`p-2.5 rounded-xl border text-center transition-all ${
+                            sortBy === s.id
+                              ? "bg-[#7B4FC9] text-white border-[#7B4FC9] font-bold"
+                              : "bg-[#FBF8F3] text-[#635572] border-[#EFE9E2]"
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Chakra Filter */}
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#8E6D24] block mb-2">
+                      Chakra Energy Vortex
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {chakras.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => setActiveChakra(c.id)}
+                          className={`px-3 py-1.5 rounded-full text-xs transition-all ${
+                            activeChakra === c.id
+                              ? "bg-[#C9A24D] text-[#2B1B3D] font-bold shadow-xs"
+                              : "bg-[#FBF8F3] text-[#635572] border border-[#EFE9E2]"
+                          }`}
+                        >
+                          {c.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Spiritual Intention */}
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#8E6D24] block mb-2">
+                      Spiritual Purpose / Intention
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {purposes.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => setActivePurpose(p.id)}
+                          className={`px-3 py-1.5 rounded-full text-xs transition-all ${
+                            activePurpose === p.id
+                              ? "bg-[#7B4FC9] text-white font-bold shadow-xs"
+                              : "bg-[#FBF8F3] text-[#635572] border border-[#EFE9E2]"
+                          }`}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Sheet Actions */}
+                <div className="p-4 pt-3 border-t border-[#EFE9E2] bg-[#FAF8F3] flex items-center gap-3">
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={handleResetFilters}
+                      className="flex-1 py-3 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-[#7B4FC9] border border-[#7B4FC9]/40 bg-white cursor-pointer text-center"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="flex-[2] py-3 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst cursor-pointer shadow-md text-center"
+                  >
+                    View {filteredProducts.length} Gems
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* 5. Product Grid */}
         {filteredProducts.length === 0 ? (

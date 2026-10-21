@@ -23,6 +23,15 @@ export function TiltCard({
   const rotateY = useSpring(0, { damping: 20, stiffness: 200 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Disable 3D tilt on touch screens or if reduced motion is requested
+    if (
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches ||
+       window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    ) {
+      return;
+    }
+
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;

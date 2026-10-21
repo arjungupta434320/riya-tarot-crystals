@@ -191,7 +191,7 @@ export default function HomePage() {
       </section>
 
       {/* 2. MARQUEE TICKER STRIP */}
-      <div className="w-full bg-[#FAF8F3] py-3 border-b border-[#EFE9E2] overflow-hidden">
+      <div className="w-full max-w-full bg-[#FAF8F3] py-3 border-b border-[#EFE9E2] overflow-hidden min-w-0">
         <div className="animate-marquee whitespace-nowrap flex items-center gap-12 text-xs font-semibold uppercase tracking-widest text-[#2B1B3D]">
           {[...Array(6)].map((_, i) => (
             <span key={i} className="flex items-center gap-6">

@@ -12,8 +12,8 @@ export default function MobileBottomNav() {
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  // If on checkout page, keep clean
-  if (pathname === "/checkout") return null;
+  // If on checkout or product page, keep clean for dedicated bottom conversion bars
+  if (pathname === "/checkout" || pathname?.startsWith("/product")) return null;
 
   return (
     <nav 

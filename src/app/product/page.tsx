@@ -876,27 +876,53 @@ function ProductContent() {
 
       </div>
 
-      {/* Sticky Mobile Add-to-Cart Bar */}
+      {/* Mobile Sticky Dual Conversion Bar */}
       <AnimatePresence>
         {showStickyAdd && (
           <motion.div
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
-            className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#EFE9E2] p-3 px-4 flex items-center justify-between shadow-2xl"
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-[#EFE9E2] p-2.5 px-3 shadow-[0_-8px_30px_rgba(43,27,61,0.12)]"
+            style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)" }}
           >
-            <div>
-              <span className="text-[10px] text-[#635572] line-clamp-1">{product.name}</span>
-              <span className="text-base font-bold text-[#2B1B3D]">
-                ₹{currentPrice.toLocaleString("en-IN")}
-              </span>
+            <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] text-[#635572] font-medium line-clamp-1 truncate">{product.name}</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base font-bold text-[#2B1B3D]">
+                    ₹{currentPrice.toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-[10px] text-[#8E6D24] font-semibold uppercase">
+                    • {selectedBeadSize}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dual Action Buttons */}
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={justAdded}
+                  className="py-2.5 px-3 rounded-full text-xs font-semibold uppercase tracking-wider text-[#7B4FC9] bg-[#F5F0FD] border border-[#7B4FC9]/30 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                  aria-label="Add to Bag"
+                >
+                  <ShoppingBag size={14} />
+                  <span>{justAdded ? "Added" : "Add"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  className="py-2.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst shadow-md active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Buy Now</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
             </div>
-            <button
-              onClick={handleAddToCart}
-              className="py-2.5 px-6 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst cursor-pointer shadow-md"
-            >
-              Add to Bag
-            </button>
           </motion.div>
         )}
       </AnimatePresence>

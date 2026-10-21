@@ -370,14 +370,14 @@ export function QuizEngine({ isModal = false, onClose }: { isModal?: boolean; on
           </div>
 
           {/* Options */}
-          <div className="space-y-2.5">
+          <div className="space-y-2 sm:space-y-2.5">
             {currentQuestion.options.map((option) => {
               const isSelected = answers[currentQuestion.id] === option.id;
               return (
                 <button
                   key={option.id}
                   onClick={() => handleSelectOption(currentQuestion.id, option.id)}
-                  className={`w-full p-4 rounded-2xl border text-left transition-all duration-200 flex items-center justify-between cursor-pointer touch-press ${
+                  className={`w-full p-3.5 sm:p-4 rounded-2xl border text-left min-h-[48px] transition-all duration-200 flex items-center justify-between cursor-pointer touch-press active:scale-[0.99] ${
                     isSelected
                       ? "bg-[#F5F0FD] border-[#7B4FC9] shadow-sm text-[#7B4FC9] font-bold"
                       : "bg-white border-[#EFE9E2] hover:border-[#C9A24D]/50 hover:bg-[#FBF8F3] text-[#2B1B3D]"
