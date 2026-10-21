@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useStore, Product } from "@/store/useStore";
 import { 
   X, 
@@ -278,25 +279,35 @@ export default function QuickViewModal() {
                   type="button"
                   onClick={handleAddToCart}
                   disabled={isAdded}
-                  className="flex-grow py-3 px-5 rounded-full text-xs font-semibold tracking-wider uppercase text-[#2C2A29] btn-gold-shimmer flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="flex-grow py-3 px-5 rounded-full text-xs font-semibold tracking-wider uppercase text-white btn-amethyst flex items-center justify-center gap-2 cursor-pointer shadow-md"
                 >
                   {isAdded ? (
                     <>
-                      <Check size={14} className="text-[#2C2A29]" />
+                      <Check size={14} className="text-white" />
                       <span>Added to Bag!</span>
                     </>
                   ) : (
                     <>
-                      <ShoppingBag size={14} className="text-[#2C2A29]" />
+                      <ShoppingBag size={14} className="text-white" />
                       <span>Add to Bag • ₹{(price * quantity).toLocaleString("en-IN")}</span>
                     </>
                   )}
                 </button>
               </div>
 
-              <p className="text-[10px] text-center text-[#6E6A64]">
-                ✨ Complimentary Express Shipping on Orders Above ₹1,499
-              </p>
+              <div className="flex items-center justify-between text-[11px] pt-1">
+                <Link
+                  href={`/product?id=${quickViewProduct.id}`}
+                  onClick={closeQuickView}
+                  className="text-[#7B4FC9] hover:underline font-semibold flex items-center gap-1"
+                >
+                  <span>View Full Details & 360° Spin</span>
+                  <span>→</span>
+                </Link>
+                <span className="text-[#635572]">
+                  ✨ Free Shipping Above ₹999
+                </span>
+              </div>
             </div>
 
           </div>

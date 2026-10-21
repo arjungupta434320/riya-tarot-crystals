@@ -229,6 +229,12 @@ export default function CartDrawer() {
                                 </span>
                               </div>
 
+                              {item.kundliDetails && (
+                                <div className="mt-1 px-2 py-0.5 rounded bg-[#FFFDF9] border border-[#C9A24D]/35 text-[10px] text-[#8E6D24] font-medium truncate">
+                                  ★ Consecrated for: {item.kundliDetails.fullName} ({item.kundliDetails.dob})
+                                </div>
+                              )}
+
                               <div className="flex items-center justify-between mt-2.5">
                                 <div className="flex items-center border border-[#EAE5DF] rounded-lg bg-[#FAF9F6] px-1.5 py-0.5">
                                   <button
@@ -439,15 +445,17 @@ export default function CartDrawer() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => toggleCheckoutModal(true)}
-                  className="w-full py-3.5 px-6 rounded-full text-xs font-semibold tracking-wider uppercase text-[#2C2A29] btn-gold-shimmer flex items-center justify-center gap-2 cursor-pointer shadow-md"
-                >
-                  <Sparkles size={15} className="text-[#2C2A29]" />
-                  <span>Proceed to Luxury Checkout</span>
-                  <ArrowRight size={14} />
-                </button>
+                <div className="space-y-2">
+                  <a
+                    href="/checkout"
+                    onClick={toggleCart}
+                    className="w-full py-3.5 px-6 rounded-full text-xs font-semibold tracking-wider uppercase text-white btn-amethyst flex items-center justify-center gap-2 cursor-pointer shadow-md text-center"
+                  >
+                    <Sparkles size={15} className="text-[#C9A24D]" />
+                    <span>Proceed to Express Checkout</span>
+                    <ArrowRight size={14} />
+                  </a>
+                </div>
 
                 <div className="flex items-center justify-center gap-2 text-[10px] text-[#6E6A64] pt-0.5">
                   <ShieldCheck size={12} className="text-[#D4AF37]" />

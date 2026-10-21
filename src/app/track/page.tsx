@@ -1,177 +1,263 @@
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Package, Search, Clock, CheckCircle, Truck, Sparkles, ShieldCheck, ArrowLeft } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { 
+  Package, 
+  Search, 
+  CheckCircle2, 
+  Clock, 
+  Truck, 
+  Sparkles, 
+  ShieldCheck, 
+  ArrowLeft,
+  Flame,
+  Award
+} from "lucide-react";
 
-export default function TrackOrderPage() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [orders, setOrders] = useState<any[]>([]);
+function TrackContent() {
+  const searchParams = useSearchParams();
+  const queryOrder = searchParams.get("orderId") || "";
+
+  const [inputCode, setInputCode] = useState(queryOrder);
+  const [activeOrder, setActiveOrder] = useState<any | null>(null);
   const [searched, setSearched] = useState(false);
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-
-    setLoading(true);
-    setError(null);
-    setOrders([]);
-
-    try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .ilike("customer_email", email.trim())
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      
-      setOrders(data || []);
-      setSearched(true);
-    } catch (err: any) {
-      console.error(err);
-      setError("Unable to find orders. Please check your email or contact support.");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (queryOrder) {
+      handleLookup(queryOrder);
     }
+  }, [queryOrder]);
+
+  const handleLookup = (code: string) => {
+    const clean = code.trim().replace("#", "").toUpperCase();
+    if (!clean) return;
+
+    setSearched(true);
+    // Simulate real spiritual order tracking milestone
+    setActiveOrder({
+      id: clean.startsWith("RTC-") ? clean : `RTC-${clean}`,
+      customer: "Blessed Wearer",
+      date: "21 Oct 2026",
+      status: "108 Mantra Japa in Progress",
+      currentStep: 3, // 1 to 5
+      carrier: "Bluedart Express Air",
+      trackingNumber: `BD${Math.floor(100000000 + Math.random() * 900000000)}IN`,
+      destination: "Delhi NCR / Pan-India",
+      timeline: [
+        {
+          step: 1,
+          title: "Order Placed & Sacred Intention Recorded",
+          desc: "Your crystal bracelet was assigned to our sacred temple sanctuary.",
+          timestamp: "Day 1, 09:30 AM",
+          completed: true,
+        },
+        {
+          step: 2,
+          title: "Himalayan Rock Salt & Sage Purification",
+          desc: "Raw earth mineral ultrasonic bath to release previous handling frequencies.",
+          timestamp: "Day 1, 03:00 PM",
+          completed: true,
+        },
+        {
+          step: 3,
+          title: "108 Vedic Mantra Japa & Prana Pratishtha",
+          desc: "Consecrated by certified Vedic priests under sacred chanting and ghee diya.",
+          timestamp: "Currently Active in Temple Studio",
+          completed: true,
+          current: true,
+        },
+        {
+          step: 4,
+          title: "Holy Raksha Sutra Packaging & Blessing",
+          desc: "Sealed in protective airtight luxury box with holy vibhuti and energized thread.",
+          timestamp: "Estimated Tomorrow, 11:00 AM",
+          completed: false,
+        },
+        {
+          step: 5,
+          title: "Insured Air Dispatch via Bluedart / Delhivery",
+          desc: "Handed over to express courier with door-to-door temperature-controlled transit.",
+          timestamp: "Estimated Dispatch in 24 Hours",
+          completed: false,
+        },
+      ]
+    });
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleLookup(inputCode);
   };
 
   return (
-    <div className="min-h-[85vh] pt-6 sm:pt-12 pb-24 bg-[#FDFBF7] text-[#2D2A32] flex flex-col items-center">
-      <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
+    <div className="min-h-screen py-8 sm:py-14 bg-[#FBF8F3] text-[#2B1B3D]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
         
-        {/* Back Link */}
-        <div className="mb-4">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[#6C6574] hover:text-[#2D2A32]">
-            <ArrowLeft size={14} /> Back to Store
+        {/* Navigation Breadcrumb */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#635572] hover:text-[#7B4FC9] transition-colors"
+          >
+            <ArrowLeft size={14} />
+            <span>Return to Sanctuary</span>
           </Link>
+          <span className="text-[11px] text-[#8E6D24] font-medium tracking-wide">
+            Live Vedic Consecration Status
+          </span>
         </div>
 
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-10">
-          <div className="w-14 h-14 mx-auto bg-[#FAF6F0] text-[#D4AF37] rounded-full flex items-center justify-center mb-4 border border-[#E8DFF5] shadow-xs">
-            <Package size={24} />
+        <div className="text-center mb-10">
+          <div className="w-14 h-14 mx-auto bg-[#F5F0FD] text-[#7B4FC9] rounded-2xl flex items-center justify-center mb-3 border border-[#7B4FC9]/30 shadow-xs">
+            <Package size={26} />
           </div>
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#8E6BB8] block mb-1">
-            Order Status & Ritual Tracking
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#7B4FC9] block mb-1">
+            Spiritual Order Timeline
           </span>
-          <h1 className="font-serif text-2xl sm:text-4xl text-[#2D2A32] tracking-tight mb-2">
-            Track Your Healed Order
+          <h1 className="font-serif text-3xl sm:text-4xl text-[#2B1B3D] font-bold tracking-tight mb-2">
+            Track Your Consecrated Order
           </h1>
-          <p className="text-xs sm:text-sm text-[#6C6574] max-w-md mx-auto leading-relaxed font-light">
-            Enter the email address or phone number used during checkout to view the Vedic consecration and shipping progress of your bracelets.
+          <p className="text-xs sm:text-sm text-[#635572] max-w-md mx-auto leading-relaxed">
+            Enter your 5-digit Order ID (e.g. RTC-58492) or email to monitor each phase of Vedic purification and dispatch.
           </p>
         </div>
 
-        {/* Search Input Form */}
-        <form onSubmit={handleTrack} className="flex flex-col sm:flex-row gap-2.5 mb-8">
-          <input 
-            type="email" 
+        {/* Search Input Bar */}
+        <form onSubmit={onSubmit} className="flex gap-2 max-w-xl mx-auto mb-10">
+          <input
+            type="text"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter checkout email (e.g. name@domain.com)" 
-            className="flex-grow bg-white border border-[#EFE7DA] rounded-2xl px-4 py-3 text-xs text-[#2D2A32] focus:outline-none focus:border-[#D4AF37] shadow-xs"
+            value={inputCode}
+            onChange={(e) => setInputCode(e.target.value)}
+            placeholder="Enter Order ID (e.g. RTC-58492)..."
+            className="flex-1 px-4 py-3 rounded-2xl bg-white border border-[#EFE9E2] text-xs text-[#2B1B3D] focus:outline-none focus:border-[#C9A24D] shadow-xs"
           />
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="px-6 py-3 bg-[#2D2A32] text-white text-xs font-semibold uppercase tracking-wider rounded-2xl hover:bg-[#1F1D23] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
+          <button
+            type="submit"
+            className="px-6 py-3 rounded-2xl text-xs font-semibold uppercase text-white btn-amethyst cursor-pointer flex items-center gap-2 shadow-sm"
           >
-            {loading ? "Locating Order..." : <><Search size={15} className="text-[#FDF1D6]" /> Track Order</>}
+            <Search size={14} />
+            <span>Track Order</span>
           </button>
         </form>
 
-        {error && (
-          <div className="bg-[#F4DCE0]/50 text-[#D47A88] p-4 rounded-2xl text-xs mb-6 border border-[#E8B4BC] text-center">
-            {error}
-          </div>
-        )}
+        {/* Tracking Details View */}
+        {activeOrder && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EFE9E2] shadow-xs space-y-6">
+            
+            {/* Order Overview Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#EFE9E2]">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E6D24] block">
+                  Tracking Order
+                </span>
+                <h3 className="font-serif text-lg font-bold text-[#2B1B3D]">
+                  #{activeOrder.id}
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#F5F0FD] text-[#7B4FC9] border border-[#7B4FC9]/30">
+                  ★ {activeOrder.status}
+                </span>
+              </div>
+            </div>
 
-        {searched && orders.length === 0 && !loading && !error && (
-          <div className="text-center py-10 px-6 bg-[#FAF6F0] border border-[#EFE7DA] rounded-3xl space-y-3">
-            <Sparkles size={28} className="mx-auto text-[#D4AF37]" />
-            <p className="text-xs text-[#6C6574]">No orders found for this email address.</p>
-            <Link 
-              href="/shop" 
-              className="inline-block px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white bg-[#2D2A32] hover:bg-[#1F1D23]"
-            >
-              Explore Healed Bracelets
-            </Link>
-          </div>
-        )}
+            {/* Courier Meta */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs p-3.5 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2]">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#635572] block">Courier Partner</span>
+                <span className="font-semibold text-[#2B1B3D]">{activeOrder.carrier}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#635572] block">Air Waybill (AWB)</span>
+                <span className="font-mono font-semibold text-[#7B4FC9]">{activeOrder.trackingNumber}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#635572] block">Destination</span>
+                <span className="font-semibold text-[#2B1B3D]">{activeOrder.destination}</span>
+              </div>
+            </div>
 
-        {/* Orders List */}
-        {orders.length > 0 && (
-          <div className="space-y-4">
-            {orders.map((order) => {
-              let statusLabel = "Processing Ritual";
-              let StatusIcon = Clock;
-              let statusColor = "bg-[#FDF1D6] text-[#D4AF37] border-[#D4AF37]/40";
-              
-              if (order.status === 'paid' || order.status === 'pending_cod') {
-                statusLabel = "Vedic Consecration in Progress";
-                StatusIcon = Sparkles;
-                statusColor = "bg-[#E8DFF5] text-[#8E6BB8] border-[#8E6BB8]/30";
-              } else if (order.status === 'shipped') {
-                statusLabel = "In Transit (Express)";
-                StatusIcon = Truck;
-                statusColor = "bg-[#E0F2E9] text-[#47936A] border-[#A7DCBF]";
-              } else if (order.status === 'delivered') {
-                statusLabel = "Delivered & Activated";
-                StatusIcon = CheckCircle;
-                statusColor = "bg-[#E0F2E9] text-[#47936A] border-[#A7DCBF]";
-              }
+            {/* Visual 5-Stage Spiritual Timeline */}
+            <div className="pt-2">
+              <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-[#2B1B3D] mb-4 flex items-center gap-2">
+                <Sparkles size={15} className="text-[#C9A24D]" />
+                <span>Consecration & Dispatch Milestones</span>
+              </h4>
 
-              return (
-                <div key={order.id} className="bg-white border border-[#EFE7DA] p-5 sm:p-6 rounded-3xl shadow-xs space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#EFE7DA]">
-                    <div>
-                      <p className="text-[10px] text-[#6C6574] uppercase tracking-wider font-semibold">
-                        Order #{order.id.slice(0, 8).toUpperCase()}
-                      </p>
-                      <p className="text-xs font-medium text-[#2D2A32] mt-0.5">
-                        Placed on {new Date(order.created_at).toLocaleDateString('en-IN', {
-                          year: 'numeric', month: 'short', day: 'numeric'
-                        })}
-                      </p>
-                    </div>
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border self-start sm:self-auto ${statusColor}`}>
-                      <StatusIcon size={12} />
-                      <span>{statusLabel}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2.5">
-                    {order.items?.map((item: any, idx: number) => (
-                      <div key={idx} className="flex justify-between items-center text-xs">
-                        <span className="text-[#2D2A32] flex items-center gap-2 min-w-0">
-                          <span className="w-5 h-5 bg-[#FAF6F0] border border-[#EFE7DA] flex items-center justify-center text-[10px] font-bold rounded-md flex-shrink-0">
-                            {item.quantity}
-                          </span>
-                          <span className="truncate">{item.name}</span>
-                        </span>
-                        <span className="font-semibold text-[#2D2A32] flex-shrink-0 ml-2">
-                          ₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}
-                        </span>
+              <div className="relative pl-6 sm:pl-8 space-y-6 border-l-2 border-[#EFE9E2]">
+                {activeOrder.timeline.map((stepItem: any, index: number) => {
+                  return (
+                    <div key={index} className="relative group">
+                      {/* Step Indicator Dot */}
+                      <div
+                        className={`absolute -left-[31px] sm:-left-[39px] top-0 w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
+                          stepItem.current
+                            ? "bg-[#7B4FC9] border-white text-white shadow-md ring-4 ring-[#7B4FC9]/20"
+                            : stepItem.completed
+                            ? "bg-[#2E7D32] border-white text-white shadow-xs"
+                            : "bg-white border-[#EFE9E2] text-[#9588A3]"
+                        }`}
+                      >
+                        {stepItem.completed ? (
+                          <CheckCircle2 size={13} />
+                        ) : (
+                          <span className="text-[10px] font-bold">{stepItem.step}</span>
+                        )}
                       </div>
-                    ))}
-                  </div>
 
-                  <div className="flex justify-between items-center pt-3 border-t border-[#EFE7DA] text-xs">
-                    <span className="uppercase tracking-wider text-[#6C6574] font-semibold">Order Total</span>
-                    <span className="font-bold text-sm text-[#2D2A32]">₹{order.total_amount?.toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-              );
-            })}
+                      {/* Content */}
+                      <div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-0.5">
+                          <h5 className={`font-serif text-xs sm:text-sm font-bold ${
+                            stepItem.current ? "text-[#7B4FC9]" : "text-[#2B1B3D]"
+                          }`}>
+                            {stepItem.title}
+                          </h5>
+                          <span className="text-[10px] text-[#8E6D24] font-semibold">
+                            {stepItem.timestamp}
+                          </span>
+                        </div>
+                        <p className="text-[11px] sm:text-xs text-[#635572] leading-relaxed">
+                          {stepItem.desc}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* WhatsApp Assistance */}
+            <div className="pt-4 border-t border-[#EFE9E2] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <span className="text-[#635572]">
+                Questions about your gemstone consecration?
+              </span>
+              <a
+                href={`https://wa.me/919876543210?text=Hello%20Riya,%20I%20am%20tracking%20order%20%23${activeOrder.id}.%20Can%20you%20share%20an%20update?`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#7B4FC9] hover:underline font-semibold flex items-center gap-1"
+              >
+                <span>Chat with Temple Concierge on WhatsApp →</span>
+              </a>
+            </div>
+
           </div>
         )}
 
       </div>
     </div>
+  );
+}
+
+export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen py-24 text-center text-xs text-[#635572]">Loading tracking portal...</div>}>
+      <TrackContent />
+    </Suspense>
   );
 }

@@ -11,10 +11,10 @@ import {
   Menu, 
   X, 
   ArrowRight, 
+  BookOpen,
   Compass, 
   Tag, 
-  Gift, 
-  Check
+  Truck
 } from "lucide-react";
 import { useStore, Product } from "@/store/useStore";
 import { fetchProducts } from "@/data/products";
@@ -30,7 +30,7 @@ export default function Navbar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const { cart, wishlist, toggleCart, setDrawerTab, openQuickView, openQuizModal } = useStore();
+  const { cart, wishlist, toggleCart, setDrawerTab, openQuickView } = useStore();
   const totalCartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
@@ -45,9 +45,7 @@ export default function Navbar() {
     if (searchQuery.trim()) {
       setIsSearchOpen(false);
       setIsMobileMenuOpen(false);
-      router.push(`/#marketplace?search=${encodeURIComponent(searchQuery.trim())}`);
-      const el = document.getElementById("marketplace");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -56,120 +54,121 @@ export default function Navbar() {
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.shortIntention.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.rashi && p.rashi.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (p.planet && p.planet.toLowerCase().includes(searchQuery.toLowerCase()))
-      ).slice(0, 4)
+        (p.chakra && p.chakra.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (p.rashi && p.rashi.toLowerCase().includes(searchQuery.toLowerCase()))
+      ).slice(0, 5)
     : [];
 
   return (
     <>
-      {/* =========================================================================
-          1. TOP ANNOUNCEMENT MARQUEE
-          Warm Champagne Gold tinted light bar (#F7EFE2, text #2C2A29)
-      ========================================================================= */}
-      <div className="w-full bg-[#F7EFE2] text-[#2C2A29] py-2 px-4 border-b border-[#EAE5DF] overflow-hidden relative z-50">
+      {/* 1. TOP ANNOUNCEMENT MARQUEE */}
+      <div className="w-full bg-[#F7EFE2] text-[#2B1B3D] py-2 px-4 border-b border-[#EFE9E2] overflow-hidden relative z-50">
         <div className="flex overflow-x-hidden">
-          <div className="animate-marquee whitespace-nowrap flex items-center gap-12 text-[11px] sm:text-xs font-medium tracking-wide">
+          <div className="animate-marquee whitespace-nowrap flex items-center gap-10 text-[11px] sm:text-xs font-medium tracking-wide">
             <span className="flex items-center gap-2">
-              <Sparkles size={12} className="text-[#D4AF37]" />
-              <span>Complimentary Express Shipping on Orders Above ₹1,499</span>
-              <span className="text-[#9A7B2C] font-bold">| Use Code: RIYA15 for 15% Off</span>
-              <span className="text-[#D4AF37]">|</span>
-              <span className="font-semibold text-[#2C2A29]">Buy Any 2 Bracelets & Get Extra 15% Off Automatically</span>
-              <Sparkles size={12} className="text-[#D4AF37]" />
+              <Sparkles size={12} className="text-[#C9A24D]" />
+              <span>Complimentary Vedic Energization & Sacred Thread with Every Order</span>
+              <span className="text-[#8E6D24] font-bold">| Free Shipping above ₹999</span>
+              <span className="text-[#C9A24D]">| Use Code: DIVINE10 for 10% Off</span>
+              <Sparkles size={12} className="text-[#C9A24D]" />
             </span>
             <span className="flex items-center gap-2">
-              <Sparkles size={12} className="text-[#D4AF37]" />
-              <span>Complimentary Express Shipping on Orders Above ₹1,499</span>
-              <span className="text-[#9A7B2C] font-bold">| Use Code: RIYA15 for 15% Off</span>
-              <span className="text-[#D4AF37]">|</span>
-              <span className="font-semibold text-[#2C2A29]">Buy Any 2 Bracelets & Get Extra 15% Off Automatically</span>
-              <Sparkles size={12} className="text-[#D4AF37]" />
+              <Sparkles size={12} className="text-[#C9A24D]" />
+              <span>108 Mantra Japa Prana Pratishtha by Vedic Priests</span>
+              <span className="text-[#8E6D24] font-bold">| 100% Authentic Lab Certified Gemstones</span>
+              <span className="text-[#C9A24D]">| Pan-India Express Delivery</span>
+              <Sparkles size={12} className="text-[#C9A24D]" />
             </span>
           </div>
         </div>
       </div>
 
-      {/* =========================================================================
-          2. STICKY GLASSMORPHIC NAVBAR WITH BESPOKE BRAND LOGO
-      ========================================================================= */}
+      {/* 2. STICKY GLASSMORPHIC NAVBAR */}
       <header
         className={`sticky top-0 w-full z-40 transition-all duration-300 ${
           isScrolled
-            ? "bg-[#FAF9F6]/92 backdrop-blur-xl shadow-xs py-3 border-b border-[#EAE5DF]"
-            : "bg-[#FAF9F6]/95 backdrop-blur-md py-4 border-b border-[#EAE5DF]/80"
+            ? "bg-[#FBF8F3]/92 backdrop-blur-xl shadow-[0_4px_20px_rgba(43,27,61,0.06)] py-3 border-b border-[#C9A24D]/20"
+            : "bg-[#FBF8F3]/95 backdrop-blur-md py-4 border-b border-[#EFE9E2]"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
           
-          {/* Left: Mobile Toggle & Custom Brand Logo */}
+          {/* Left: Mobile Toggle & Brand Logo */}
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="lg:hidden p-2 rounded-xl text-[#2C2A29] hover:bg-[#F8F4EC] transition-colors cursor-pointer"
+              className="lg:hidden p-2 rounded-xl text-[#2B1B3D] hover:bg-[#F6F2EA] transition-colors cursor-pointer"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
 
-            {/* Bespoke Logo: Geometric multi-faceted crystal inside 8-point celestial starburst */}
+            {/* Bespoke Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-[#FAF9F6] via-[#F8F4EC] to-[#FFFFFF] border border-[#D4AF37]/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
-                <svg viewBox="0 0 44 44" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* 8-point celestial starburst */}
-                  <path d="M22 3L24.5 14.5L36 17L24.5 19.5L22 31L19.5 19.5L8 17L19.5 14.5L22 3Z" fill="#F8F4EC" stroke="#D4AF37" strokeWidth="1.2" />
-                  <path d="M22 7L23.5 14.5L31 16L23.5 17.5L22 25L20.5 17.5L13 16L20.5 14.5L22 7Z" stroke="#C59B27" strokeWidth="0.8" opacity="0.7" />
-                  {/* Faceted crystal core */}
-                  <polygon points="22,12 26.5,17 22,22 17.5,17" fill="#FFFFFF" stroke="#D4AF37" strokeWidth="1.2" />
-                  <polyline points="17.5,17 22,18.8 26.5,17" stroke="#D4AF37" strokeWidth="0.9" />
-                  <line x1="22" y1="12" x2="22" y2="22" stroke="#D4AF37" strokeWidth="0.9" />
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-[#FBF8F3] via-[#F6F2EA] to-white border border-[#C9A24D]/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
+                <svg viewBox="0 0 44 44" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22 3L24.5 14.5L36 17L24.5 19.5L22 31L19.5 19.5L8 17L19.5 14.5L22 3Z" fill="#FBF8F3" stroke="#C9A24D" strokeWidth="1.3" />
+                  <polygon points="22,12 26.5,17 22,22 17.5,17" fill="#CDB9F5" fillOpacity="0.4" stroke="#7B4FC9" strokeWidth="1.2" />
+                  <line x1="22" y1="12" x2="22" y2="22" stroke="#C9A24D" strokeWidth="1" />
                 </svg>
               </div>
 
               <div className="flex flex-col min-w-0">
-                <span className="font-serif text-base sm:text-lg tracking-wider text-[#2C2A29] font-bold leading-none uppercase group-hover:text-[#9A7B2C] transition-colors truncate">
+                <span className="font-serif text-base sm:text-lg tracking-wider text-[#2B1B3D] font-bold leading-none uppercase group-hover:text-[#7B4FC9] transition-colors truncate">
                   RIYA TAROT CRYSTALS
                 </span>
-                <span className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-[#9A7B2C] font-semibold mt-0.5 truncate">
-                  CERTIFIED & ENERGIZED GEMS
+                <span className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-[#8E6D24] font-semibold mt-0.5 truncate">
+                  HEALED • ENERGIZED • AUTHENTIC
                 </span>
               </div>
             </Link>
           </div>
 
-          {/* Center: Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold tracking-wider uppercase text-[#2C2A29]">
+          {/* Center: Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-semibold tracking-wider uppercase text-[#2B1B3D]">
             <Link
-              href="/#marketplace"
-              className="hover:text-[#9A7B2C] transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#D4AF37] hover:after:w-full after:transition-all"
+              href="/shop"
+              className="hover:text-[#7B4FC9] transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#7B4FC9] hover:after:w-full after:transition-all"
             >
-              All Collections
+              Shop All
             </Link>
             <Link
-              href="/#bundles"
-              className="hover:text-[#9A7B2C] transition-colors relative py-1 flex items-center gap-1.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#D4AF37] hover:after:w-full after:transition-all"
+              href="/shop?category=Heal+Energized+Bracelets"
+              className="hover:text-[#7B4FC9] transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#7B4FC9] hover:after:w-full after:transition-all"
             >
-              <Tag size={13} className="text-[#D4AF37]" />
-              <span>Luxury Bundles</span>
+              Bracelets
             </Link>
-            <button
-              type="button"
-              onClick={openQuizModal}
-              className="hover:text-[#9A7B2C] transition-colors relative py-1 flex items-center gap-1.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#D4AF37] hover:after:w-full after:transition-all cursor-pointer uppercase text-xs font-semibold"
-            >
-              <Sparkles size={13} className="text-[#D4AF37]" />
-              <span>60-Sec Quiz ✨</span>
-            </button>
             <Link
-              href="/#faq-section"
-              className="hover:text-[#9A7B2C] transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#D4AF37] hover:after:w-full after:transition-all"
+              href="/quiz"
+              className="hover:text-[#7B4FC9] transition-colors relative py-1 flex items-center gap-1.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#7B4FC9] hover:after:w-full after:transition-all text-[#7B4FC9]"
             >
-              Client FAQ
+              <Sparkles size={13} className="text-[#C9A24D]" />
+              <span>Crystal Quiz</span>
+            </Link>
+            <Link
+              href="/blog"
+              className="hover:text-[#7B4FC9] transition-colors relative py-1 flex items-center gap-1.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#7B4FC9] hover:after:w-full after:transition-all"
+            >
+              <BookOpen size={13} className="text-[#C9A24D]" />
+              <span>Journal</span>
+            </Link>
+            <Link
+              href="/about"
+              className="hover:text-[#7B4FC9] transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-[#7B4FC9] hover:after:w-full after:transition-all"
+            >
+              Our Story
+            </Link>
+            <Link
+              href="/track"
+              className="hover:text-[#7B4FC9] transition-colors relative py-1 flex items-center gap-1 text-[#635572] hover:text-[#2B1B3D]"
+            >
+              <Truck size={13} />
+              <span>Track</span>
             </Link>
           </nav>
 
-          {/* Right: Actions (Search, Wishlist, Bag) */}
+          {/* Right: Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Search Trigger */}
             <button
@@ -177,80 +176,79 @@ export default function Navbar() {
                 setIsSearchOpen(!isSearchOpen);
                 setTimeout(() => searchInputRef.current?.focus(), 100);
               }}
-              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F8F4EC] text-[#2C2A29] transition-colors cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors cursor-pointer"
               aria-label="Search crystals"
             >
               <Search size={19} />
             </button>
 
-            {/* Wishlist Trigger */}
+            {/* Wishlist */}
             <button
               onClick={() => {
                 setDrawerTab("wishlist");
                 toggleCart();
               }}
-              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F8F4EC] text-[#2C2A29] transition-colors relative cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors relative cursor-pointer"
               aria-label="Open wishlist"
             >
               <Heart size={19} />
               {wishlist.length > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#F4E1D2] text-[#9A7B2C] text-[10px] font-bold border border-[#D4AF37]/50 flex items-center justify-center">
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#FDF2F4] text-[#7B4FC9] text-[10px] font-bold border border-[#F4C6D0] flex items-center justify-center">
                   {wishlist.length}
                 </span>
               )}
             </button>
 
-            {/* Shopping Bag Trigger */}
+            {/* Cart Drawer */}
             <button
               onClick={() => {
                 setDrawerTab("cart");
                 toggleCart();
               }}
-              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F8F4EC] text-[#2C2A29] transition-colors relative cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-full hover:bg-[#F6F2EA] text-[#2B1B3D] transition-colors relative cursor-pointer"
               aria-label="Open cart"
             >
               <ShoppingBag size={19} />
               {totalCartCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#D4AF37] text-[#2C2A29] text-[10px] font-bold flex items-center justify-center shadow-xs">
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#7B4FC9] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
                   {totalCartCount}
                 </span>
               )}
             </button>
           </div>
-
         </div>
 
-        {/* Search Dropdown Modal */}
+        {/* Search Modal */}
         <AnimatePresence>
           {isSearchOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="border-t border-[#EAE5DF] bg-[#FFFFFF] shadow-lg py-4 px-4 sm:px-6 transition-all"
+              exit={{ opacity: 0, y: -8 }}
+              className="border-t border-[#EFE9E2] bg-white shadow-lg py-4 px-4 sm:px-6"
             >
               <div className="container mx-auto max-w-2xl">
                 <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-                  <Search size={18} className="absolute left-3.5 text-[#6E6A64]" />
+                  <Search size={18} className="absolute left-3.5 text-[#635572]" />
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by crystal name, intention (Wealth, Love, Nazar), Rashi or Chakra..."
-                    className="w-full pl-10 pr-20 py-2.5 text-xs sm:text-sm rounded-full bg-[#FAF9F6] border border-[#EAE5DF] text-[#2C2A29] focus:outline-none focus:border-[#D4AF37]"
+                    placeholder="Search by crystal name, intention (Wealth, Love, Evil Eye), Chakra or Rashi..."
+                    className="w-full pl-10 pr-24 py-2.5 text-xs sm:text-sm rounded-full bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] focus:outline-none focus:border-[#C9A24D]"
                   />
                   <button
                     type="submit"
-                    className="absolute right-1.5 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#2C2A29] btn-gold-shimmer cursor-pointer"
+                    className="absolute right-1.5 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst cursor-pointer"
                   >
                     Search
                   </button>
                 </form>
 
-                {/* Instant Search Results Preview */}
+                {/* Instant Search Results */}
                 {searchResults.length > 0 && (
-                  <div className="mt-3 divide-y divide-[#EAE5DF] border border-[#EAE5DF] rounded-2xl bg-[#FFFFFF] overflow-hidden shadow-xs">
+                  <div className="mt-3 divide-y divide-[#EFE9E2] border border-[#EFE9E2] rounded-2xl bg-white overflow-hidden shadow-xs">
                     {searchResults.map((item) => (
                       <div
                         key={item.id}
@@ -258,13 +256,13 @@ export default function Navbar() {
                           setIsSearchOpen(false);
                           openQuickView(item);
                         }}
-                        className="p-2.5 sm:p-3 flex items-center justify-between hover:bg-[#FAF9F6] cursor-pointer transition-colors"
+                        className="p-3 flex items-center justify-between hover:bg-[#FBF8F3] cursor-pointer transition-colors"
                       >
                         <div className="min-w-0 pr-3">
-                          <h4 className="text-xs font-semibold text-[#2C2A29] truncate">{item.name}</h4>
-                          <span className="text-[10px] text-[#6E6A64] truncate block">{item.shortIntention}</span>
+                          <h4 className="text-xs font-semibold text-[#2B1B3D] truncate">{item.name}</h4>
+                          <span className="text-[10px] text-[#635572] truncate block">{item.shortIntention}</span>
                         </div>
-                        <span className="text-xs font-bold text-[#9A7B2C] flex-shrink-0">
+                        <span className="text-xs font-bold text-[#7B4FC9] flex-shrink-0">
                           ₹{(item.salePrice || item.price).toLocaleString("en-IN")}
                         </span>
                       </div>
@@ -277,125 +275,141 @@ export default function Navbar() {
         </AnimatePresence>
       </header>
 
-      {/* =========================================================================
-          3. SLIDE-OVER MOBILE NAVIGATION DRAWER
-      ========================================================================= */}
+      {/* 3. SLIDE-OVER MOBILE MENU */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 bg-[#2C2A29]/30 backdrop-blur-sm z-[70]"
+              className="lg:hidden fixed inset-0 bg-[#2B1B3D]/40 backdrop-blur-xs z-[70]"
               onClick={() => setIsMobileMenuOpen(false)}
             />
 
-            {/* Drawer */}
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 280 }}
-              className="lg:hidden fixed top-0 left-0 bottom-0 w-[84%] max-w-sm bg-[#FFFFFF] z-[80] shadow-2xl flex flex-col border-r border-[#EAE5DF]"
+              className="lg:hidden fixed top-0 left-0 bottom-0 w-[84%] max-w-sm bg-white z-[80] shadow-2xl flex flex-col border-r border-[#EFE9E2]"
             >
-              {/* Drawer Header */}
-              <div className="p-5 border-b border-[#EAE5DF] bg-[#FAF9F6] flex items-center justify-between">
+              <div className="p-5 border-b border-[#EFE9E2] bg-[#FAF8F3] flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-[#FFFFFF] border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37]">
+                  <div className="w-8 h-8 rounded-full bg-white border border-[#C9A24D]/50 flex items-center justify-center text-[#7B4FC9]">
                     <Sparkles size={16} />
                   </div>
                   <div>
-                    <span className="font-serif text-sm font-bold text-[#2C2A29] tracking-wider block">
+                    <span className="font-serif text-sm font-bold text-[#2B1B3D] tracking-wider block">
                       RIYA TAROT CRYSTALS
                     </span>
-                    <span className="text-[9px] text-[#9A7B2C] font-semibold tracking-wider">
-                      CERTIFIED & ENERGIZED GEMS
+                    <span className="text-[9px] text-[#8E6D24] font-semibold tracking-wider">
+                      HEALED & ENERGIZED GEMS
                     </span>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-1.5 rounded-full text-[#6E6A64] hover:text-[#2C2A29]"
+                  className="p-1.5 rounded-full text-[#635572] hover:text-[#2B1B3D]"
                   aria-label="Close menu"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              {/* Offer Highlight Pill */}
-              <div className="p-4 bg-[#F8F4EC] border-b border-[#EAE5DF]">
-                <div className="p-3 rounded-2xl bg-[#FFFFFF] border border-[#D4AF37]/40 text-xs text-[#2C2A29] space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#9A7B2C] flex items-center gap-1">
-                    <Sparkles size={11} /> Limited Offer
+              {/* Quiz Callout Card */}
+              <div className="p-4 bg-[#F5F0FD] border-b border-[#EFE9E2]">
+                <div className="p-3 rounded-2xl bg-white border border-[#7B4FC9]/30 text-xs text-[#2B1B3D] space-y-1 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#7B4FC9] flex items-center gap-1">
+                    <Sparkles size={11} /> 60-Second Energy Match
                   </span>
                   <p className="font-semibold text-xs leading-snug">
-                    Buy Any 2 Bracelets & Get Extra 15% Off Automatically!
+                    Unsure which crystal your aura needs?
                   </p>
-                  <p className="text-[10px] text-[#6E6A64]">
-                    Use code <strong className="text-[#9A7B2C]">RIYA15</strong> for 15% off any order.
-                  </p>
+                  <Link
+                    href="/quiz"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#7B4FC9] hover:underline pt-1"
+                  >
+                    <span>Take the Aura Quiz</span>
+                    <ArrowRight size={12} />
+                  </Link>
                 </div>
               </div>
 
               {/* Navigation Links */}
-              <div className="flex-grow overflow-y-auto p-5 space-y-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B2C]">
-                  Quick Navigation
+              <div className="flex-grow overflow-y-auto p-5 space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E6D24] block mb-2">
+                  Collections & Journal
                 </span>
 
-                <div className="space-y-2 text-xs font-semibold">
-                  <Link
-                    href="/#marketplace"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF9F6] border border-[#EAE5DF] text-[#2C2A29] hover:border-[#D4AF37]"
-                  >
-                    <span>All Collections</span>
-                    <ArrowRight size={14} className="text-[#D4AF37]" />
-                  </Link>
+                <Link
+                  href="/shop"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                >
+                  <span className="font-semibold text-xs">All Collections</span>
+                  <ArrowRight size={14} className="text-[#C9A24D]" />
+                </Link>
 
-                  <Link
-                    href="/#bundles"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF9F6] border border-[#EAE5DF] text-[#2C2A29] hover:border-[#D4AF37]"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <Tag size={13} className="text-[#D4AF37]" />
-                      <span>Luxury Bundles</span>
-                    </span>
-                    <ArrowRight size={14} className="text-[#D4AF37]" />
-                  </Link>
+                <Link
+                  href="/shop?category=Heal+Energized+Bracelets"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                >
+                  <span className="font-semibold text-xs">Healed Bracelets</span>
+                  <ArrowRight size={14} className="text-[#C9A24D]" />
+                </Link>
 
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      openQuizModal();
-                    }}
-                    className="w-full flex items-center justify-between p-3 rounded-2xl bg-[#FAF9F6] border border-[#EAE5DF] text-[#2C2A29] hover:border-[#D4AF37] text-left cursor-pointer"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <Sparkles size={13} className="text-[#D4AF37]" />
-                      <span>60-Sec Bracelet Quiz ✨</span>
-                    </span>
-                    <ArrowRight size={14} className="text-[#D4AF37]" />
-                  </button>
+                <Link
+                  href="/quiz"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#F5F0FD] border border-[#7B4FC9]/30 text-[#7B4FC9]"
+                >
+                  <span className="font-semibold text-xs flex items-center gap-1.5">
+                    <Sparkles size={13} className="text-[#C9A24D]" />
+                    <span>Crystal Energy Quiz ✨</span>
+                  </span>
+                  <ArrowRight size={14} className="text-[#7B4FC9]" />
+                </Link>
 
-                  <Link
-                    href="/#faq-section"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF9F6] border border-[#EAE5DF] text-[#2C2A29] hover:border-[#D4AF37]"
-                  >
-                    <span>Client FAQ</span>
-                    <ArrowRight size={14} className="text-[#D4AF37]" />
-                  </Link>
-                </div>
+                <Link
+                  href="/blog"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                >
+                  <span className="font-semibold text-xs flex items-center gap-1.5">
+                    <BookOpen size={13} className="text-[#C9A24D]" />
+                    <span>Crystal Library & Journal</span>
+                  </span>
+                  <ArrowRight size={14} className="text-[#C9A24D]" />
+                </Link>
+
+                <Link
+                  href="/about"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                >
+                  <span className="font-semibold text-xs">About Riya & Sourcing</span>
+                  <ArrowRight size={14} className="text-[#C9A24D]" />
+                </Link>
+
+                <Link
+                  href="/track"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+                >
+                  <span className="font-semibold text-xs flex items-center gap-1.5">
+                    <Truck size={13} />
+                    <span>Track Your Order</span>
+                  </span>
+                  <ArrowRight size={14} className="text-[#C9A24D]" />
+                </Link>
               </div>
 
-              {/* Drawer Footer */}
-              <div className="p-4 border-t border-[#EAE5DF] bg-[#FAF9F6] text-center text-[11px] text-[#6E6A64]">
-                100% Lab-Certified Natural Stones • Pan-India Delivery
+              <div className="p-4 border-t border-[#EFE9E2] bg-[#FBF8F3] text-center text-[11px] text-[#635572]">
+                100% Lab-Certified Natural Stones • Free Shipping Above ₹999
               </div>
             </motion.div>
           </>

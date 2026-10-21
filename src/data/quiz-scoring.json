@@ -1,0 +1,165 @@
+{
+  "title": "Riya Tarot Crystals - Metaphysical Quiz Scoring Matrix",
+  "description": "Rules engine mapping user questionnaire choices to crystal frequencies, chakras, and matching product IDs.",
+  "scoringWeights": {
+    "goal": 35,
+    "challenge": 30,
+    "element": 15,
+    "color": 10,
+    "zodiac": 10
+  },
+  "questions": [
+    {
+      "step": 1,
+      "id": "goal",
+      "question": "What is the primary divine intention you wish to invoke?",
+      "subtitle": "Your intention is the tuning fork of your energetic field.",
+      "options": [
+        {
+          "id": "wealth",
+          "label": "Wealth, Cashflow & Business Luck",
+          "chakra": "Solar Plexus",
+          "keywords": ["citrine", "pyrite", "aventurine", "abundance", "money"],
+          "recommendedIds": ["mixel-triple-abundance", "kundali-surya-dhan-yog-pyrite", "gemstone-natural-yellow-sapphire"]
+        },
+        {
+          "id": "love",
+          "label": "Soulmate Alignment & Heart Healing",
+          "chakra": "Heart",
+          "keywords": ["rose quartz", "rhodochrosite", "opalite", "love"],
+          "recommendedIds": ["mixel-love-protection-synergy", "chakra-heart-rose-quartz", "pendant-rose-quartz-point"]
+        },
+        {
+          "id": "protection",
+          "label": "Psychic Protection & Warding Evil Eye",
+          "chakra": "Root",
+          "keywords": ["black tourmaline", "obsidian", "hematite", "nazar"],
+          "recommendedIds": ["mixel-love-protection-synergy", "pendant-black-tourmaline-shield", "kundali-shani-blue-sapphire-amethyst"]
+        },
+        {
+          "id": "calm",
+          "label": "Deep Anxiety Relief & Inner Peace",
+          "chakra": "Crown & Third Eye",
+          "keywords": ["amethyst", "clear quartz", "howlite", "peace"],
+          "recommendedIds": ["mixel-crown-clarity-focus", "kundali-shani-blue-sapphire-amethyst", "cluster-raw-amethyst-geode"]
+        },
+        {
+          "id": "career",
+          "label": "Executive Confidence & Willpower",
+          "chakra": "Solar Plexus",
+          "keywords": ["tiger eye", "sunstone", "carnelian", "career"],
+          "recommendedIds": ["chakra-solar-tiger-eye", "kundali-budh-mercury-emerald-mix", "kundali-surya-dhan-yog-pyrite"]
+        },
+        {
+          "id": "alignment",
+          "label": "Full 7-Chakra Meridian Harmony",
+          "chakra": "All 7 Chakras",
+          "keywords": ["7 chakra", "kundalini", "sphatik", "alignment"],
+          "recommendedIds": ["chakra-7-harmony-bracelet", "mixel-triple-abundance", "kundali-shukra-venus-opal-quartz"]
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "id": "challenge",
+      "question": "What is the biggest energetic hurdle currently weighing on you?",
+      "subtitle": "Crystals absorb and transmute karmic friction.",
+      "options": [
+        {
+          "id": "stuck-money",
+          "label": "Stuck payments, career stagnation or unpredictable cashflow",
+          "tag": "wealth-block",
+          "recommendedIds": ["mixel-triple-abundance", "kundali-surya-dhan-yog-pyrite"]
+        },
+        {
+          "id": "heartbreak",
+          "label": "Past relationship grief, boundary erosion or feeling unloved",
+          "tag": "heart-block",
+          "recommendedIds": ["mixel-love-protection-synergy", "chakra-heart-rose-quartz"]
+        },
+        {
+          "id": "overthinking",
+          "label": "Restless mind, insomnia, overanalyzing every move",
+          "tag": "crown-block",
+          "recommendedIds": ["mixel-crown-clarity-focus", "kundali-shani-blue-sapphire-amethyst"]
+        },
+        {
+          "id": "drained-energy",
+          "label": "Constantly drained around coworkers/relatives, feeling watched",
+          "tag": "aura-breach",
+          "recommendedIds": ["pendant-black-tourmaline-shield", "mixel-love-protection-synergy"]
+        },
+        {
+          "id": "lack-direction",
+          "label": "Procrastination, imposter syndrome, scattered motivation",
+          "tag": "solar-block",
+          "recommendedIds": ["chakra-solar-tiger-eye", "kundali-budh-mercury-emerald-mix"]
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "id": "zodiac",
+      "question": "What is your Sun Sign or Vedic Rashi?",
+      "subtitle": "Planetary rulers govern specific crystalline mineral lattices.",
+      "options": [
+        { "id": "aries-scorpio", "label": "Aries / Scorpio (Mesha / Vrischika) • Mars", "recommendedIds": ["chakra-solar-tiger-eye", "pendant-black-tourmaline-shield"] },
+        { "id": "taurus-libra", "label": "Taurus / Libra (Vrishabha / Tula) • Venus", "recommendedIds": ["chakra-heart-rose-quartz", "kundali-shukra-venus-opal-quartz"] },
+        { "id": "gemini-virgo", "label": "Gemini / Virgo (Mithuna / Kanya) • Mercury", "recommendedIds": ["kundali-budh-mercury-emerald-mix", "gemstone-natural-zambian-emerald"] },
+        { "id": "cancer", "label": "Cancer (Karka) • Moon", "recommendedIds": ["chakra-heart-rose-quartz", "kundali-shukra-venus-opal-quartz"] },
+        { "id": "leo", "label": "Leo (Simha) • Sun", "recommendedIds": ["kundali-surya-dhan-yog-pyrite", "chakra-solar-tiger-eye"] },
+        { "id": "sagittarius-pisces", "label": "Sagittarius / Pisces (Dhanu / Meena) • Jupiter", "recommendedIds": ["mixel-triple-abundance", "gemstone-natural-yellow-sapphire"] },
+        { "id": "capricorn-aquarius", "label": "Capricorn / Aquarius (Makara / Kumbha) • Saturn", "recommendedIds": ["kundali-shani-blue-sapphire-amethyst", "cluster-raw-amethyst-geode"] }
+      ]
+    },
+    {
+      "step": 4,
+      "id": "element",
+      "question": "Which natural element revives your spirit most deeply?",
+      "subtitle": "Your elemental affinity tunes gemstone resonance.",
+      "options": [
+        { "id": "fire", "label": "Fire — Warm sunlight, glowing flame, passionate drive", "stoneAffinity": ["pyrite", "tiger eye", "carnelian"] },
+        { "id": "water", "label": "Water — Ocean waves, soothing rain, intuitive depths", "stoneAffinity": ["rose quartz", "aquamarine", "larimar"] },
+        { "id": "earth", "label": "Earth — Deep forest soil, ancient stones, grounding stability", "stoneAffinity": ["black tourmaline", "aventurine", "tree agate"] },
+        { "id": "air", "label": "Air — Mountain breezes, open skies, articulate ideas", "stoneAffinity": ["fluorite", "amethyst", "clear quartz"] },
+        { "id": "ether", "label": "Cosmic Ether — Starlight, meditation bells, sacred silence", "stoneAffinity": ["moldavite", "sphatik", "lapis lazuli"] }
+      ]
+    },
+    {
+      "step": 5,
+      "id": "color",
+      "question": "Which crystal aura color is your eye drawn to right now?",
+      "subtitle": "Your subconscious chooses the frequency your cells thirst for.",
+      "options": [
+        { "id": "gold", "label": "Shimmering Gold & Amber (Solar Light)", "colorHex": "#C9A24D" },
+        { "id": "purple", "label": "Royal Violet & Lavender (Third Eye Stillness)", "colorHex": "#7B4FC9" },
+        { "id": "pink", "label": "Gentle Rose & Peach (Heart Receptivity)", "colorHex": "#F4C6D0" },
+        { "id": "green", "label": "Emerald & Jade Green (Organic Abundance)", "colorHex": "#2E7D32" },
+        { "id": "black", "label": "Inky Black & Obsidian (Root Shielding)", "colorHex": "#1A1A1A" },
+        { "id": "rainbow", "label": "Iridescent All-Chakra Rainbow Spectrum", "colorHex": "#CDB9F5" }
+      ]
+    },
+    {
+      "step": 6,
+      "id": "wristSize",
+      "question": "What is your approximate wrist size?",
+      "subtitle": "Ensures your energized bracelet drapes in pure harmony.",
+      "options": [
+        { "id": "small", "label": "Petite (6.0\" – 6.5\")" },
+        { "id": "standard", "label": "Standard (6.5\" – 7.5\") • Fits most comfortably" },
+        { "id": "large", "label": "Relaxed / Broad (7.5\" – 8.5\")" }
+      ]
+    },
+    {
+      "step": 7,
+      "id": "budget",
+      "question": "What is your comfortable sacred investment range?",
+      "subtitle": "Authentic Grade-A crystals are available across all budgets.",
+      "options": [
+        { "id": "under-1500", "label": "Under ₹1,500 (Core Healing Bracelets)" },
+        { "id": "1500-3000", "label": "₹1,500 – ₹3,000 (Mixel Synergy & Kundali Curations)" },
+        { "id": "luxury", "label": "₹3,000+ (Master Geodes & Precious Loose Gems)" }
+      ]
+    }
+  ]
+}

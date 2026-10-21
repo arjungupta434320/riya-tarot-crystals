@@ -1,38 +1,57 @@
 import Link from "next/link";
+import { Sparkles, Compass, ArrowRight } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6">
-      <div className="text-[#b85c38] mb-6">
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="64" 
-          height="64" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="1" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
+    <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-6 bg-[#FBF8F3] text-[#2B1B3D] relative overflow-hidden">
+      
+      {/* Background Cosmic Glows */}
+      <div className="absolute w-96 h-96 rounded-full bg-[#CDB9F5]/25 blur-3xl pointer-events-none" />
+      <div className="absolute w-80 h-80 rounded-full bg-[#F4C6D0]/20 blur-3xl pointer-events-none -bottom-10" />
+
+      {/* Floating Gem Icon */}
+      <div className="relative w-20 h-20 rounded-full bg-white border border-[#C9A24D]/50 flex items-center justify-center text-[#7B4FC9] mb-6 shadow-md animate-float">
+        <svg
+          className="w-10 h-10 text-[#7B4FC9]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
         >
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+          <line x1="12" y1="22" x2="12" y2="15.5" />
+          <polyline points="22 8.5 12 15.5 2 8.5" />
+          <polyline points="2 15.5 12 8.5 22 15.5" />
         </svg>
       </div>
-      
-      <h1 className="font-serif text-4xl md:text-5xl text-primary mb-4">
-        Lost in the Universe
+
+      <span className="text-xs font-bold uppercase tracking-widest text-[#8E6D24] mb-2 block">
+        404 • Energy Frequency Divergence
+      </span>
+
+      <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#2B1B3D] mb-4 tracking-tight">
+        Lost in the Cosmic Ether
       </h1>
-      
-      <p className="text-primary/70 text-lg mb-8 max-w-md mx-auto leading-relaxed">
-        It seems the page you are looking for has shifted its energy and cannot be found. 
+
+      <p className="text-xs sm:text-sm text-[#635572] mb-8 max-w-md mx-auto leading-relaxed">
+        The crystal frequency you seek has dissolved into the ether or shifted its dimensional coordinate. Let us realign your path.
       </p>
-      
-      <Link 
-        href="/shop" 
-        className="bg-primary text-secondary text-sm tracking-[0.2em] uppercase px-8 py-4 hover:bg-accent transition-colors"
-      >
-        Return to the Shop
-      </Link>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Link 
+          href="/" 
+          className="px-8 py-3.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst inline-flex items-center gap-2 shadow-md"
+        >
+          <span>Return to Alignment (Home)</span>
+          <ArrowRight size={14} />
+        </Link>
+        <Link 
+          href="/shop" 
+          className="px-7 py-3.5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#2B1B3D] btn-pearl-gold"
+        >
+          Browse Sacred Crystals
+        </Link>
+      </div>
     </div>
   );
 }

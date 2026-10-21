@@ -2,41 +2,41 @@
 
 import React from "react";
 import Link from "next/link";
-import BraceletQuiz from "@/components/BraceletQuiz";
+import { QuizEngine } from "@/components/quiz/QuizEngine";
 import { ArrowLeft, Sparkles, ShieldCheck } from "lucide-react";
 
 export default function QuizPage() {
   return (
-    <div className="min-h-screen py-10 sm:py-16 bg-[#FAF9F6] text-[#2C2A29]">
-      <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
+    <div className="min-h-screen py-8 sm:py-14 bg-[#FBF8F3] text-[#2B1B3D]">
+      <div className="container mx-auto px-4 sm:px-6">
         
         {/* Navigation Breadcrumb */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between max-w-2xl mx-auto">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[#6E6A64] hover:text-[#2C2A29] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#635572] hover:text-[#7B4FC9] transition-colors"
           >
             <ArrowLeft size={14} />
-            <span>Back to Home</span>
+            <span>Return to Sanctuary</span>
           </Link>
 
-          <span className="text-xs font-semibold text-[#9A7B2C] flex items-center gap-1.5">
-            <Sparkles size={13} className="text-[#D4AF37]" />
+          <span className="text-xs font-semibold text-[#8E6D24] flex items-center gap-1.5">
+            <Sparkles size={13} className="text-[#C9A24D]" />
             <span>Vedic Intention Engine</span>
           </span>
         </div>
 
-        {/* Dedicated 4-Step Quiz Component */}
-        <BraceletQuiz />
+        {/* 7-Step Quiz Engine */}
+        <QuizEngine />
 
         {/* Bottom Trust Row */}
-        <div className="mt-8 text-center text-xs text-[#6E6A64] flex items-center justify-center gap-4">
+        <div className="mt-8 text-center text-xs text-[#635572] flex items-center justify-center gap-4">
           <span className="flex items-center gap-1">
-            <ShieldCheck size={14} className="text-[#D4AF37]" />
-            <span>100% Lab-Certified Natural Stones</span>
+            <ShieldCheck size={14} className="text-[#C9A24D]" />
+            <span>100% Lab-Certified Natural Crystals</span>
           </span>
           <span>•</span>
-          <span>Personalized Astrological Consecration</span>
+          <span>108 Mantra Japa Prana Pratishtha</span>
         </div>
 
       </div>

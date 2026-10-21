@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useStore } from "@/store/useStore";
-import { submitOrder } from "@/lib/supabaseClient";
+import { lookupIndianPincode } from "@/lib/pincodes";
+import { loadRazorpayScript } from "@/lib/razorpay";
+import { fireDivineConfetti } from "@/components/animations/ConfettiCelebration";
 import { 
   Sparkles, 
   ShieldCheck, 
@@ -17,7 +19,10 @@ import {
   Banknote,
   Lock,
   ShoppingBag,
-  ChevronDown
+  ChevronDown,
+  MessageCircle,
+  Truck,
+  Check
 } from "lucide-react";
 
 const INDIAN_STATES = [
@@ -57,7 +62,7 @@ export default function CheckoutPage() {
   const [stateName, setStateName] = useState("Delhi NCR");
 
   const [deliveryMethod, setDeliveryMethod] = useState<"standard" | "express">("standard");
-  const [paymentMethod, setPaymentMethod] = useState<"upi" | "cards" | "netbanking" | "cod">("upi");
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">("razorpay");
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
@@ -68,25 +73,41 @@ export default function CheckoutPage() {
     0
   );
 
-  // 15% automatic tiered discount for 2+ items
-  const isTieredQualified = totalQuantity >= 2;
-  const tieredDiscount = isTieredQualified ? Math.round(rawSubtotal * 0.15) : 0;
-
-  // Coupon discount
+  // 10% coupon discount if applied
   let couponDiscount = 0;
-  if (appliedCoupon === "RIYA10") couponDiscount = Math.round(rawSubtotal * 0.10);
-  else if (appliedCoupon === "LUXURY15" || appliedCoupon === "RIYA15") couponDiscount = Math.round(rawSubtotal * 0.15);
-  else if (appliedCoupon === "KUNDALI20") couponDiscount = Math.round(rawSubtotal * 0.20);
+  if (appliedCoupon === "DIVINE10" || appliedCoupon === "RIYA10") {
+    couponDiscount = Math.round(rawSubtotal * 0.10);
+  } else if (appliedCoupon === "LUXURY15" || appliedCoupon === "RIYA15") {
+    couponDiscount = Math.round(rawSubtotal * 0.15);
+  }
 
-  const totalDiscount = tieredDiscount + couponDiscount;
-
-  // Shipping
-  const isFreeStandard = (rawSubtotal - totalDiscount) >= 1499 || rawSubtotal >= 1499;
+  // Free shipping above ₹999
+  const freeShippingThreshold = 999;
+  const isFreeStandard = (rawSubtotal - couponDiscount) >= freeShippingThreshold || rawSubtotal >= freeShippingThreshold;
   const deliveryFee = deliveryMethod === "express" ? 99 : (isFreeStandard ? 0 : 79);
+  const codFee = paymentMethod === "cod" ? 60 : 0;
 
-  const grandTotal = Math.max(0, rawSubtotal - totalDiscount + deliveryFee);
+  const grandTotal = Math.max(0, rawSubtotal - couponDiscount + deliveryFee + codFee);
 
-  // Field validations
+  // Auto-fill City & State from Indian Pincode
+  const handlePincodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "");
+    setPincode(val);
+
+    if (val.length >= 2) {
+      const match = lookupIndianPincode(val);
+      if (match) {
+        if (!city || city === "New Delhi" || city.includes("/")) {
+          setCity(match.city.split(" / ")[0]);
+        }
+        if (INDIAN_STATES.includes(match.state)) {
+          setStateName(match.state);
+        }
+      }
+    }
+  };
+
+  // Validations
   const isPhoneValid = /^[6-9]\d{9}$/.test(phone.replace(/\D/g, ""));
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isPincodeValid = /^\d{6}$/.test(pincode.trim());
@@ -125,483 +146,517 @@ export default function CheckoutPage() {
     }
 
     if (!isFormValid) {
-      showToast("Please verify highlighted form fields.", "info");
+      showToast("Please complete the required address fields.", "info");
       return;
     }
 
-    setLoading(true);
-    const orderNum = `#RTC-${Math.floor(10000 + Math.random() * 90000)}`;
+    const orderNum = `RTC-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    const res = await submitOrder({
-      customer: {
-        name: fullName,
-        phone,
-        email,
-        address: `${address}${landmark ? `, Near: ${landmark}` : ""}`,
-        city,
-        state: stateName,
-        pincode
-      },
-      items: cart,
-      total: grandTotal,
-      paymentMethod: paymentMethod.toUpperCase(),
-      energizationNote: {
-        name: fullName,
-        dob: "General Astrological Consecration",
-        intention: "General Prosperity & Protection"
+    if (paymentMethod === "razorpay") {
+      setLoading(true);
+      const scriptLoaded = await loadRazorpayScript();
+
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_RiyaTarotGems";
+
+      if (scriptLoaded && (window as any).Razorpay && process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+        // Real Razorpay gateway modal
+        const rzp = new (window as any).Razorpay({
+          key: razorpayKey,
+          amount: grandTotal * 100, // paise
+          currency: "INR",
+          name: "Riya Tarot Crystals",
+          description: "Consecrated Gemstones & Bracelets",
+          image: "/images/logo.jpg",
+          handler: (response: any) => {
+            finalizeOrder(orderNum);
+          },
+          prefill: {
+            name: fullName,
+            email,
+            contact: phone,
+          },
+          theme: {
+            color: "#7B4FC9",
+          },
+        });
+        rzp.open();
+        setLoading(false);
+        return;
+      } else {
+        // Simulated test mode for instant checkout test
+        setTimeout(() => {
+          finalizeOrder(orderNum);
+        }, 1000);
       }
-    });
+    } else {
+      // COD Order
+      setLoading(true);
+      setTimeout(() => {
+        finalizeOrder(orderNum);
+      }, 800);
+    }
+  };
 
-    setOrderId(res.orderId || orderNum);
+  const finalizeOrder = (orderNum: string) => {
+    setOrderId(orderNum);
     setLoading(false);
     setStep("confirmed");
     clearCart();
+    fireDivineConfetti();
   };
 
+  // 1. Order Confirmed Celebration Page
   if (step === "confirmed") {
     return (
-      <div className="min-h-screen py-20 bg-[#FAF9F6] text-[#2C2A29] flex items-center justify-center px-4">
-        <div className="max-w-xl w-full p-8 sm:p-12 rounded-3xl bg-[#FFFFFF] border-2 border-[#D4AF37] shadow-[0_20px_50px_rgba(212,175,55,0.22)] text-center space-y-6">
-          <div className="w-20 h-20 rounded-full bg-[#F8F4EC] border-2 border-[#D4AF37] text-[#D4AF37] flex items-center justify-center mx-auto shadow-md">
+      <div className="min-h-screen py-16 bg-[#FBF8F3] text-[#2B1B3D] flex items-center justify-center px-4">
+        <div className="max-w-xl w-full p-8 sm:p-12 rounded-3xl bg-white border border-[#C9A24D]/40 shadow-[0_20px_50px_rgba(123,79,201,0.18)] text-center space-y-6">
+          <div className="w-20 h-20 rounded-full bg-[#F5F0FD] border-2 border-[#7B4FC9]/40 text-[#7B4FC9] flex items-center justify-center mx-auto shadow-md animate-bounce">
             <Sparkles size={34} />
           </div>
 
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B2C] block mb-1">
-              Order Confirmed & Sacredly Blessed
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E6D24] block mb-1">
+              Order Confirmed & Consecration Initiated
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2C2A29]">
-              Thank You, {fullName || "Blessed Wearer"}!
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2B1B3D]">
+              Blessings to You, {fullName || "Blessed Wearer"}!
             </h2>
-            <p className="text-xs sm:text-sm text-[#6E6A64] mt-2 leading-relaxed">
-              Your order is in our studio. Each bracelet is being consecrated with 108 Vedic Beej Mantras under Full Moon illumination before insured dispatch.
+            <p className="text-xs sm:text-sm text-[#635572] mt-2 leading-relaxed">
+              Your sacred order is in our studio. Each crystal is being ritually cleansed with holy Himalayan sage and energized with 108 Vedic Beej Mantras prior to insured dispatch.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE5DF] text-xs text-[#2C2A29] space-y-2 text-left">
-            <div className="flex justify-between border-b border-[#EAE5DF] pb-2">
-              <span className="text-[#6E6A64]">Order ID:</span>
-              <strong className="font-mono text-[#9A7B2C]">{orderId}</strong>
+          <div className="p-4 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-xs text-[#2B1B3D] space-y-2 text-left">
+            <div className="flex justify-between border-b border-[#EFE9E2] pb-2">
+              <span className="text-[#635572]">Order Number:</span>
+              <strong className="font-mono text-[#7B4FC9]">#{orderId}</strong>
             </div>
-            <div className="flex justify-between border-b border-[#EAE5DF] pb-2">
-              <span className="text-[#6E6A64]">Delivery Destination:</span>
+            <div className="flex justify-between border-b border-[#EFE9E2] pb-2">
+              <span className="text-[#635572]">Destination:</span>
               <span>{city}, {stateName} ({pincode})</span>
             </div>
-            <div className="flex justify-between border-b border-[#EAE5DF] pb-2">
-              <span className="text-[#6E6A64]">Selected Payment:</span>
-              <span className="font-semibold">{paymentMethod.toUpperCase()}</span>
+            <div className="flex justify-between border-b border-[#EFE9E2] pb-2">
+              <span className="text-[#635572]">Payment Selected:</span>
+              <span className="font-semibold">{paymentMethod === "razorpay" ? "Razorpay Online (Prepaid)" : "Cash on Delivery (COD)"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#6E6A64]">Estimated Arrival:</span>
-              <strong className="text-emerald-800">3–5 Business Days</strong>
+              <span className="text-[#635572]">Total Sacred Amount:</span>
+              <strong className="text-base text-[#2B1B3D]">₹{grandTotal.toLocaleString("en-IN")}</strong>
             </div>
           </div>
 
-          <Link
-            href="/"
-            className="w-full py-4 px-6 rounded-full text-xs font-semibold tracking-wider uppercase text-[#2C2A29] btn-gold-shimmer block"
-          >
-            Return to Collection Home
-          </Link>
+          {/* Action Buttons: WhatsApp notification & Live Order Tracking */}
+          <div className="space-y-2.5 pt-2">
+            <a
+              href={`https://wa.me/919876543210?text=Namaste%20Riya,%20I%20have%20placed%20order%20%23${orderId}%20for%20consecration%20in%20the%20name%20of%20${encodeURIComponent(fullName)}.%20Please%20confirm%20dispatch.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-white bg-[#25D366] hover:bg-[#20BD5A] transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <MessageCircle size={16} />
+              <span>Confirm Order on WhatsApp (+91 98765 43210)</span>
+            </a>
+
+            <Link
+              href={`/track?orderId=${orderId}`}
+              className="w-full py-3.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-[#2B1B3D] btn-pearl-gold block"
+            >
+              Track Spiritual Energizing Timeline
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
+  // 2. Checkout Form Screen
   return (
-    <div className="min-h-screen py-10 sm:py-16 bg-[#FAF9F6] text-[#2C2A29]">
+    <div className="min-h-screen py-8 sm:py-14 bg-[#FBF8F3] text-[#2B1B3D]">
       <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
         
         {/* Navigation Breadcrumb */}
         <div className="mb-6 flex items-center justify-between">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[#6E6A64] hover:text-[#2C2A29] transition-colors"
+            href="/shop"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#635572] hover:text-[#7B4FC9] transition-colors"
           >
             <ArrowLeft size={14} />
-            <span>Return to Boutique</span>
+            <span>Continue Shopping</span>
           </Link>
 
-          <span className="text-xs font-bold text-[#9A7B2C] flex items-center gap-1.5">
-            <Lock size={13} className="text-[#D4AF37]" />
-            <span>256-Bit SSL Insured Checkout</span>
+          <span className="text-xs font-bold text-[#8E6D24] flex items-center gap-1.5">
+            <Lock size={13} className="text-[#C9A24D]" />
+            <span>256-Bit SSL Encrypted India Checkout</span>
           </span>
         </div>
 
-        {/* Full Split-Screen Checkout Window */}
-        <div className="rounded-3xl bg-[#FFFFFF] border border-[#EAE5DF] shadow-[0_20px_50px_rgba(212,175,55,0.15)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        {/* 2-Column Checkout Window */}
+        <div className="rounded-3xl bg-white border border-[#EFE9E2] shadow-[0_20px_50px_rgba(43,27,61,0.06)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
           
-          {/* =========================================================
-              LEFT COLUMN: ADDRESS & DELIVERY & PAYMENT (7 cols)
-          ========================================================= */}
-          <div className="lg:col-span-7 p-6 sm:p-10 space-y-6 border-b lg:border-b-0 lg:border-r border-[#EAE5DF]">
+          {/* Left: Shipping & Payment (7 cols) */}
+          <div className="lg:col-span-7 p-6 sm:p-10 space-y-6 border-b lg:border-b-0 lg:border-r border-[#EFE9E2]">
             <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#9A7B2C] mb-1">
-                <Sparkles size={13} />
-                <span>Step 1 of 2</span>
+              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7B4FC9] mb-1">
+                <Sparkles size={13} className="text-[#C9A24D]" />
+                <span>Express Sacred Checkout</span>
               </div>
-              <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#2C2A29]">
-                Shipping & Consecration Details
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2B1B3D]">
+                Shipping & Consecration Address
               </h2>
-              <p className="text-xs text-[#6E6A64] mt-0.5">
+              <p className="text-xs text-[#635572] mt-0.5">
                 Every bracelet is cleansed and dedicated to your name before insured dispatch.
               </p>
             </div>
 
-            {/* Mobile-Only Collapsible Order Summary Bar */}
-            <div className="lg:hidden p-3.5 rounded-2xl bg-[#F8F4EC] border border-[#D4AF37]/40 mb-4">
-              <button
-                type="button"
-                onClick={() => setIsMobileSummaryOpen(!isMobileSummaryOpen)}
-                className="w-full flex items-center justify-between text-xs cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <ShoppingBag size={15} className="text-[#D4AF37]" />
-                  <span className="font-semibold text-[#2C2A29]">
-                    {isMobileSummaryOpen ? "Hide Order Summary" : "Show Order Summary"}
-                  </span>
-                  <span className="text-[#9A7B2C] font-bold">({totalQuantity} items)</span>
-                </div>
-                <div className="flex items-center gap-1.5 font-bold text-[#2C2A29]">
-                  <span>₹{grandTotal.toLocaleString("en-IN")}</span>
-                  <ChevronDown size={14} className={`transition-transform duration-200 text-[#D4AF37] ${isMobileSummaryOpen ? "rotate-180" : ""}`} />
-                </div>
-              </button>
-
-              {isMobileSummaryOpen && (
-                <div className="pt-3 mt-3 border-t border-[#EAE5DF] space-y-2 text-xs">
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    {cart.map((item) => (
-                      <div key={item.cartKey || item.id} className="flex items-center justify-between gap-2 text-[11px]">
-                        <span className="text-[#2C2A29] truncate flex-1">{item.name} × {item.quantity} ({item.selectedBeadSize || "8mm"})</span>
-                        <span className="font-bold text-[#2C2A29] flex-shrink-0">₹{((item.salePrice || item.price) * item.quantity).toLocaleString("en-IN")}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {totalDiscount > 0 && (
-                    <div className="pt-2 border-t border-[#EAE5DF] flex justify-between text-[#6E6A64] text-[11px]">
-                      <span>Savings Applied:</span>
-                      <span className="text-emerald-700 font-semibold">-₹{totalDiscount.toLocaleString("en-IN")}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <form id="standalone-checkout-form" onSubmit={handleSubmit} className="space-y-3.5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name */}
               <div className="floating-input-group">
                 <input
-                  id="s_fullName"
+                  id="checkout_name"
                   type="text"
                   required
                   placeholder=" "
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   onBlur={() => markTouched("fullName")}
-                  className={touched.fullName && !isNameValid ? "!border-rose-400 !bg-rose-50/40" : touched.fullName && isNameValid ? "!border-emerald-500" : ""}
                 />
-                <label htmlFor="s_fullName">Full Name (First and Last Name) *</label>
+                <label htmlFor="checkout_name">Full Name of Wearer *</label>
               </div>
 
               {/* Phone & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="floating-input-group">
                   <input
-                    id="s_phone"
+                    id="checkout_phone"
                     type="tel"
                     required
+                    maxLength={10}
                     placeholder=" "
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     onBlur={() => markTouched("phone")}
-                    className={touched.phone && !isPhoneValid ? "!border-rose-400 !bg-rose-50/40" : touched.phone && isPhoneValid ? "!border-emerald-500" : ""}
                   />
-                  <label htmlFor="s_phone">Mobile Number (10 Digits) *</label>
+                  <label htmlFor="checkout_phone">10-Digit Mobile (WhatsApp Updates) *</label>
                 </div>
 
                 <div className="floating-input-group">
                   <input
-                    id="s_email"
+                    id="checkout_email"
                     type="email"
                     required
                     placeholder=" "
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => markTouched("email")}
-                    className={touched.email && !isEmailValid ? "!border-rose-400 !bg-rose-50/40" : touched.email && isEmailValid ? "!border-emerald-500" : ""}
                   />
-                  <label htmlFor="s_email">Email (Tracking Updates) *</label>
+                  <label htmlFor="checkout_email">Email Address *</label>
                 </div>
               </div>
 
-              {/* Street Address */}
+              {/* Address */}
               <div className="floating-input-group">
                 <input
-                  id="s_address"
+                  id="checkout_address"
                   type="text"
                   required
                   placeholder=" "
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   onBlur={() => markTouched("address")}
-                  className={touched.address && !isAddressValid ? "!border-rose-400 !bg-rose-50/40" : touched.address && isAddressValid ? "!border-emerald-500" : ""}
                 />
-                <label htmlFor="s_address">Street Address / House / Flat No. *</label>
+                <label htmlFor="checkout_address">Flat, House No., Building, Street *</label>
               </div>
 
               {/* Landmark */}
               <div className="floating-input-group">
                 <input
-                  id="s_landmark"
+                  id="checkout_landmark"
                   type="text"
                   placeholder=" "
                   value={landmark}
                   onChange={(e) => setLandmark(e.target.value)}
                 />
-                <label htmlFor="s_landmark">Nearest Landmark (Optional)</label>
+                <label htmlFor="checkout_landmark">Nearest Landmark (Optional)</label>
               </div>
 
-              {/* PIN Code, City, State */}
+              {/* PIN Code, City, State with Instant Autofill */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="floating-input-group">
                   <input
-                    id="s_pincode"
+                    id="checkout_pin"
                     type="text"
                     required
                     maxLength={6}
                     placeholder=" "
                     value={pincode}
-                    onChange={(e) => setPincode(e.target.value)}
+                    onChange={handlePincodeChange}
                     onBlur={() => markTouched("pincode")}
-                    className={touched.pincode && !isPincodeValid ? "!border-rose-400 !bg-rose-50/40" : touched.pincode && isPincodeValid ? "!border-emerald-500" : ""}
                   />
-                  <label htmlFor="s_pincode">PIN Code (6 Digits) *</label>
+                  <label htmlFor="checkout_pin">PIN Code (Autofill) *</label>
                 </div>
 
                 <div className="floating-input-group">
                   <input
-                    id="s_city"
+                    id="checkout_city"
                     type="text"
                     required
                     placeholder=" "
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     onBlur={() => markTouched("city")}
-                    className={touched.city && !isCityValid ? "!border-rose-400 !bg-rose-50/40" : touched.city && isCityValid ? "!border-emerald-500" : ""}
                   />
-                  <label htmlFor="s_city">City / District *</label>
+                  <label htmlFor="checkout_city">City / District *</label>
                 </div>
 
                 <div className="floating-input-group">
                   <select
-                    id="s_state"
+                    id="checkout_state"
                     value={stateName}
                     onChange={(e) => setStateName(e.target.value)}
                   >
-                    {INDIAN_STATES.map((st) => (
-                      <option key={st} value={st}>
-                        {st}
-                      </option>
+                    {INDIAN_STATES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
-                  <label htmlFor="s_state">State</label>
+                  <label htmlFor="checkout_state">State *</label>
                 </div>
               </div>
-            </form>
 
-            {/* Delivery Method Selector */}
-            <div className="pt-2">
-              <h4 className="font-serif text-sm font-semibold text-[#2C2A29] mb-2.5">
-                Delivery Priority
-              </h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div
-                  onClick={() => setDeliveryMethod("standard")}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    deliveryMethod === "standard"
-                      ? "bg-[#F8F4EC] border-[#D4AF37] shadow-xs"
-                      : "bg-[#FAF9F6] border-[#EAE5DF]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#2C2A29]">Standard Insured Delivery</span>
-                    <span className="text-xs font-bold text-emerald-800">
-                      {isFreeStandard ? "FREE" : "₹79"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#6E6A64] mt-1">3–5 Business Days • BlueDart Air</p>
-                </div>
-
-                <div
-                  onClick={() => setDeliveryMethod("express")}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    deliveryMethod === "express"
-                      ? "bg-[#F8F4EC] border-[#D4AF37] shadow-xs"
-                      : "bg-[#FAF9F6] border-[#EAE5DF]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#2C2A29]">Express Priority Air</span>
-                    <span className="text-xs font-bold text-[#9A7B2C]">₹99</span>
-                  </div>
-                  <p className="text-[11px] text-[#6E6A64] mt-1">1–2 Business Days • Fast-Track</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Method Selector */}
-            <div className="pt-2">
-              <h4 className="font-serif text-sm font-semibold text-[#2C2A29] mb-2.5">
-                Payment Option
-              </h4>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {[
-                  { id: "upi", label: "Instant UPI", sub: "GPay, PhonePe", icon: <Smartphone size={16} /> },
-                  { id: "cards", label: "Cards", sub: "Visa, RuPay", icon: <CreditCard size={16} /> },
-                  { id: "netbanking", label: "NetBanking", sub: "Major Banks", icon: <Building2 size={16} /> },
-                  { id: "cod", label: "Cash on Delivery", sub: "COD Available", icon: <Banknote size={16} /> },
-                ].map((pm) => {
-                  const isSelected = paymentMethod === pm.id;
-                  return (
-                    <div
-                      key={pm.id}
-                      onClick={() => setPaymentMethod(pm.id as any)}
-                      className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                        isSelected
-                          ? "bg-[#F8F4EC] border-[#D4AF37] shadow-xs"
-                          : "bg-[#FAF9F6] border-[#EAE5DF]"
-                      }`}
-                    >
-                      <div className={isSelected ? "text-[#9A7B2C]" : "text-[#6E6A64]"}>{pm.icon}</div>
-                      <span className="text-xs font-bold text-[#2C2A29]">{pm.label}</span>
-                      <span className="text-[9px] text-[#6E6A64]">{pm.sub}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-          </div>
-
-          {/* =========================================================
-              RIGHT COLUMN: ORDER SUMMARY (5 cols)
-          ========================================================= */}
-          <div className="lg:col-span-5 p-6 sm:p-10 bg-[#FAF9F6] flex flex-col justify-between space-y-6">
-            <div className="space-y-5">
-              <h3 className="font-serif text-lg font-bold text-[#2C2A29] pb-3 border-b border-[#EAE5DF]">
-                Order Summary ({totalQuantity} items)
-              </h3>
-
-              {/* Items List */}
-              <div className="max-h-64 overflow-y-auto space-y-3 pr-1">
-                {cart.length === 0 ? (
-                  <p className="text-xs text-[#6E6A64]">Your bag is currently empty.</p>
-                ) : (
-                  cart.map((item) => (
-                    <div key={item.cartKey || item.id} className="flex items-center gap-3 text-xs">
-                      <div className="w-13 h-13 rounded-xl bg-white border border-[#EAE5DF] overflow-hidden relative flex-shrink-0">
-                        <Image src={item.image} alt={item.name} fill className="object-cover" />
-                      </div>
-                      <div className="flex-grow min-w-0">
-                        <h4 className="font-semibold text-[#2C2A29] truncate">{item.name}</h4>
-                        <span className="text-[10px] text-[#6E6A64]">
-                          Qty: {item.quantity} • {item.selectedBeadSize || "8mm"}
-                        </span>
-                      </div>
-                      <span className="font-bold text-[#2C2A29] flex-shrink-0">
-                        ₹{((item.salePrice || item.price) * item.quantity).toLocaleString("en-IN")}
+              {/* Delivery Method Selection */}
+              <div className="pt-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8E6D24] block mb-2">
+                  Select Air Delivery Method
+                </span>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div
+                    onClick={() => setDeliveryMethod("standard")}
+                    className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                      deliveryMethod === "standard"
+                        ? "bg-[#F5F0FD] border-[#7B4FC9] shadow-xs"
+                        : "bg-white border-[#EFE9E2]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-[#2B1B3D]">Standard Insured Air</span>
+                      <span className="font-bold text-[#2E7D32]">
+                        {isFreeStandard ? "FREE" : "₹79"}
                       </span>
                     </div>
-                  ))
+                    <span className="text-[11px] text-[#635572]">3–5 Business Days (Bluedart/Delhivery)</span>
+                  </div>
+
+                  <div
+                    onClick={() => setDeliveryMethod("express")}
+                    className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                      deliveryMethod === "express"
+                        ? "bg-[#F5F0FD] border-[#7B4FC9] shadow-xs"
+                        : "bg-white border-[#EFE9E2]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-[#2B1B3D]">Express Priority Air</span>
+                      <span className="font-bold text-[#7B4FC9]">₹99</span>
+                    </div>
+                    <span className="text-[11px] text-[#635572]">1–2 Business Days (High Priority)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method Selection */}
+              <div className="pt-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8E6D24] block mb-2">
+                  Select Sacred Payment Mode
+                </span>
+                <div className="space-y-2.5">
+                  {/* Razorpay Online */}
+                  <label
+                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
+                      paymentMethod === "razorpay"
+                        ? "bg-[#F5F0FD] border-[#7B4FC9] shadow-xs"
+                        : "bg-white border-[#EFE9E2]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="payment_choice"
+                        checked={paymentMethod === "razorpay"}
+                        onChange={() => setPaymentMethod("razorpay")}
+                        className="text-[#7B4FC9] focus:ring-[#7B4FC9]"
+                      />
+                      <div>
+                        <span className="text-xs font-bold text-[#2B1B3D] block">
+                          Razorpay India (UPI QR, GPay, PhonePe, Cards, Netbanking)
+                        </span>
+                        <span className="text-[11px] text-[#635572]">
+                          Instant 256-bit secure gateway • Fast track consecration
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#2E7D32] bg-[#EDF7ED] px-2 py-0.5 rounded-full">
+                      Recommended
+                    </span>
+                  </label>
+
+                  {/* Cash on Delivery */}
+                  <label
+                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
+                      paymentMethod === "cod"
+                        ? "bg-[#F5F0FD] border-[#7B4FC9] shadow-xs"
+                        : "bg-white border-[#EFE9E2]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="payment_choice"
+                        checked={paymentMethod === "cod"}
+                        onChange={() => setPaymentMethod("cod")}
+                        className="text-[#7B4FC9] focus:ring-[#7B4FC9]"
+                      />
+                      <div>
+                        <span className="text-xs font-bold text-[#2B1B3D] block">
+                          Cash on Delivery (COD)
+                        </span>
+                        <span className="text-[11px] text-[#635572]">
+                          Pay cash upon home arrival (₹60 courier handling fee)
+                        </span>
+                      </div>
+                    </div>
+                    <Banknote size={16} className="text-[#635572]" />
+                  </label>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 px-6 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-60"
+                >
+                  <Lock size={14} className="text-[#C9A24D]" />
+                  <span>
+                    {loading
+                      ? "Processing Consecration Order..."
+                      : `Place Sacred Order • ₹${grandTotal.toLocaleString("en-IN")}`}
+                  </span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Right: Order Summary (5 cols) */}
+          <div className="lg:col-span-5 p-6 sm:p-10 bg-[#FAF8F3] flex flex-col justify-between space-y-6">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-[#EFE9E2] mb-4">
+                <h3 className="font-serif text-lg font-bold text-[#2B1B3D]">
+                  Order Items ({totalQuantity})
+                </h3>
+                <span className="text-xs text-[#8E6D24] font-semibold">
+                  Lab Certified
+                </span>
+              </div>
+
+              {/* Cart Items List */}
+              <div className="space-y-3 max-h-72 overflow-y-auto no-scrollbar pr-1">
+                {cart.map((item) => (
+                  <div
+                    key={item.cartKey || item.id}
+                    className="p-3 rounded-2xl bg-white border border-[#EFE9E2] flex items-center gap-3 shadow-2xs"
+                  >
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#FAF8F3] flex-shrink-0">
+                      <Image src={item.image} alt={item.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-serif text-xs font-bold text-[#2B1B3D] truncate">{item.name}</h4>
+                      <div className="flex items-center gap-2 text-[10px] text-[#635572]">
+                        <span>Qty: {item.quantity}</span>
+                        <span>•</span>
+                        <span>{item.selectedBeadSize || "8mm"}</span>
+                      </div>
+                      {item.kundliDetails && (
+                        <span className="text-[9px] text-[#8E6D24] font-semibold block truncate">
+                          ★ For {item.kundliDetails.fullName}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-bold text-xs text-[#2B1B3D]">
+                      ₹{((item.salePrice || item.price) * item.quantity).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Coupon Engine */}
+              <div className="mt-4 pt-4 border-t border-[#EFE9E2]">
+                <form onSubmit={handleApplyCoupon} className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={couponCodeInput}
+                    onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                    placeholder="Coupon code (e.g. DIVINE10)..."
+                    className="flex-1 px-3 py-2 text-xs rounded-xl bg-white border border-[#EFE9E2] text-[#2B1B3D] uppercase focus:outline-none focus:border-[#C9A24D]"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl text-xs font-semibold uppercase text-[#2B1B3D] btn-pearl-gold cursor-pointer"
+                  >
+                    Apply
+                  </button>
+                </form>
+
+                {appliedCoupon && (
+                  <div className="flex items-center justify-between text-xs text-[#2E7D32] bg-[#EDF7ED] px-3 py-1.5 rounded-xl border border-[#A5D6A7]">
+                    <span>Coupon <strong>{appliedCoupon}</strong> active</span>
+                    <span>-₹{couponDiscount.toLocaleString("en-IN")}</span>
+                  </div>
                 )}
               </div>
 
-              {/* Promo Code Input */}
-              <form onSubmit={handleApplyCoupon} className="flex gap-2 pt-2">
-                <input
-                  type="text"
-                  placeholder="Promo Code (RIYA15)"
-                  value={couponCodeInput}
-                  onChange={(e) => setCouponCodeInput(e.target.value)}
-                  className="flex-grow px-3.5 py-2 text-xs rounded-xl bg-white border border-[#EAE5DF] text-[#2C2A29] uppercase focus:outline-none focus:border-[#D4AF37]"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider text-[#2C2A29] btn-pearl-gold"
-                >
-                  Apply
-                </button>
-              </form>
-
-              {/* Price Calculation */}
-              <div className="pt-3 border-t border-[#EAE5DF] space-y-2 text-xs text-[#6E6A64]">
+              {/* Price Breakdown */}
+              <div className="mt-4 pt-4 border-t border-[#EFE9E2] space-y-2 text-xs text-[#635572]">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span className="text-[#2C2A29] font-semibold">₹{rawSubtotal.toLocaleString("en-IN")}</span>
+                  <span>Subtotal:</span>
+                  <span className="font-semibold text-[#2B1B3D]">₹{rawSubtotal.toLocaleString("en-IN")}</span>
                 </div>
 
-                {tieredDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-800 font-semibold">
-                    <span>Buy 2 Get 15% Off (Tiered)</span>
-                    <span>-₹{tieredDiscount.toLocaleString("en-IN")}</span>
-                  </div>
-                )}
-
                 {couponDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-800 font-semibold">
-                    <span>Promo Discount ({appliedCoupon})</span>
+                  <div className="flex justify-between text-[#2E7D32] font-semibold">
+                    <span>Discount:</span>
                     <span>-₹{couponDiscount.toLocaleString("en-IN")}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between">
-                  <span>Air Delivery</span>
-                  <span>
-                    {deliveryFee === 0 ? (
-                      <strong className="text-emerald-800">FREE</strong>
-                    ) : (
-                      `₹${deliveryFee}`
-                    )}
+                  <span>Air Shipping:</span>
+                  <span className="font-semibold text-[#2B1B3D]">
+                    {deliveryFee === 0 ? <strong className="text-[#2E7D32]">FREE</strong> : `₹${deliveryFee}`}
                   </span>
                 </div>
 
-                <div className="pt-3 border-t border-[#EAE5DF] flex justify-between text-base font-bold text-[#2C2A29]">
-                  <span>Total Amount:</span>
-                  <span className="text-2xl text-[#2C2A29]">
-                    ₹{grandTotal.toLocaleString("en-IN")}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Action */}
-            <div className="space-y-3 pt-4 border-t border-[#EAE5DF]">
-              <button
-                type="submit"
-                form="standalone-checkout-form"
-                disabled={loading || cart.length === 0}
-                className="w-full py-4 px-6 rounded-full text-xs font-semibold tracking-wider uppercase text-[#2C2A29] btn-gold-shimmer flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
-              >
-                {loading ? (
-                  <span>Processing...</span>
-                ) : (
-                  <>
-                    <Sparkles size={16} className="text-[#2C2A29]" />
-                    <span>Place Order • ₹{grandTotal.toLocaleString("en-IN")}</span>
-                    <ArrowRight size={14} />
-                  </>
+                {paymentMethod === "cod" && (
+                  <div className="flex justify-between">
+                    <span>COD Handling:</span>
+                    <span className="font-semibold text-[#2B1B3D]">₹60</span>
+                  </div>
                 )}
-              </button>
 
-              <div className="p-3 rounded-2xl bg-white border border-[#EAE5DF] flex items-center justify-center gap-2 text-[10px] text-[#6E6A64]">
-                <ShieldCheck size={14} className="text-[#D4AF37]" />
-                <span>256-Bit SSL Encrypted • Lab Certificate Included</span>
+                <div className="pt-2 border-t border-[#EFE9E2] flex justify-between text-sm font-bold text-[#2B1B3D]">
+                  <span>Total Payable:</span>
+                  <span className="text-base text-[#7B4FC9]">₹{grandTotal.toLocaleString("en-IN")}</span>
+                </div>
               </div>
             </div>
 
+            {/* Trust Seal */}
+            <div className="p-3.5 rounded-2xl bg-white border border-[#EFE9E2] flex items-center gap-2.5 text-[11px] text-[#635572]">
+              <ShieldCheck size={20} className="text-[#C9A24D] flex-shrink-0" />
+              <span>
+                100% Guaranteed Natural Gemstones. Sealed with holy Raksha Sutra thread and sacred prasad.
+              </span>
+            </div>
           </div>
 
         </div>

@@ -1,431 +1,453 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { LogOut, Package, Clock, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { fallbackProducts } from "@/data/products";
+import { Product } from "@/store/useStore";
+import { blogPosts } from "@/data/blogPosts";
+import { 
+  Package, 
+  Sparkles, 
+  ShoppingBag, 
+  BookOpen, 
+  Star, 
+  ShieldCheck, 
+  Plus, 
+  Trash2, 
+  LogOut, 
+  Lock, 
+  CheckCircle2,
+  Clock,
+  ArrowLeft
+} from "lucide-react";
 
 export default function AdminDashboard() {
-  const [session, setSession] = useState<any>(null);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'orders' | 'reviews' | 'products'>('orders');
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passcode, setPasscode] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [activeTab, setActiveTab] = useState<"products" | "orders" | "blog" | "reviews">("products");
+
+  // Local state for products
+  const [productsList, setProductsList] = useState<Product[]>(fallbackProducts);
   
-  // Login State
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-
-  // Product Form State
-  const [newProduct, setNewProduct] = useState({
-    id: "tree-agate", 
-    name: "Tree Agate Bracelet", 
-    description: "Connect deeply with nature and ground your spirit with our beautiful Tree Agate bracelet. Known as the stone of inner peace and abundance, Tree Agate clears energy blockages and encourages a profound connection to the earth. Its beautiful green and white moss-like patterns remind us to stay rooted while continuing to grow, bringing stability and quiet strength to the wearer.", 
-    shortIntention: "For grounding, inner peace, and natural abundance", 
-    price: "1499", 
-    salePrice: "999", 
-    category: "Bracelets", 
-    image: "/images/products/tree-agate.jpg"
-  });
-  const [productSuccess, setProductSuccess] = useState("");
-  const [productsList, setProductsList] = useState<any[]>([]);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session && session.user.email === "arjungupta434320@gmail.com") {
-        fetchOrders();
-        fetchReviews();
-        fetchProductsList();
-      } else {
-        setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session && session.user.email === "arjungupta434320@gmail.com") {
-        fetchOrders();
-        fetchReviews();
-        fetchProductsList();
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchProductsList = async () => {
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-    if (data) setProductsList(data);
-  };
-
-  const fetchOrders = async () => {
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    if (data) setOrders(data);
-    setLoading(false);
-  };
-
-  const fetchReviews = async () => {
-    const { data } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
-    if (data) setReviews(data);
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError("");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setLoginError(error.message);
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: newStatus })
-      .eq("id", orderId);
-      
-    if (!error) {
-      setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+  // Sample Orders with Kundali Data
+  const [ordersList, setOrdersList] = useState<any[]>([
+    {
+      id: "RTC-84920",
+      date: "21 Oct 2026, 02:40 PM",
+      customer: "Ananya Sharma",
+      email: "ananya.sharma@example.com",
+      phone: "+91 98111 22233",
+      destination: "Noida, Uttar Pradesh (201301)",
+      status: "108 Mantra Japa in Progress",
+      total: 2899,
+      paymentMethod: "Razorpay (Prepaid)",
+      items: [
+        {
+          name: "Triple Synergy Mixel Abundance Bracelet",
+          size: "8mm",
+          qty: 1,
+          kundliDetails: {
+            fullName: "Ananya Sharma",
+            dob: "1994-08-14",
+            tob: "08:15 AM",
+            pob: "Varanasi, UP",
+            intention: "Career promotion & financial luck",
+          }
+        }
+      ]
+    },
+    {
+      id: "RTC-73912",
+      date: "20 Oct 2026, 06:15 PM",
+      customer: "Vikram Malhotra",
+      email: "vikram.m@example.com",
+      phone: "+91 98200 44556",
+      destination: "Mumbai, Maharashtra (400050)",
+      status: "Packed & Sealed with Raksha Sutra",
+      total: 2299,
+      paymentMethod: "Cash on Delivery (COD)",
+      items: [
+        {
+          name: "Heart Armor Mixel Bracelet (Rose Quartz + Tourmaline)",
+          size: "10mm",
+          qty: 1,
+        }
+      ]
     }
-  };
+  ]);
 
-  const approveReview = async (reviewId: string) => {
-    const { error } = await supabase.from("reviews").update({ is_approved: true }).eq("id", reviewId);
-    if (!error) setReviews(reviews.map(r => r.id === reviewId ? { ...r, is_approved: true } : r));
-  };
+  // New Product Form
+  const [newProdName, setNewProdName] = useState("");
+  const [newProdPrice, setNewProdPrice] = useState("");
+  const [newProdSalePrice, setNewProdSalePrice] = useState("");
+  const [newProdCategory, setNewProdCategory] = useState("Heal Energized Bracelets");
+  const [newProdIntention, setNewProdIntention] = useState("");
 
-  const deleteReview = async (reviewId: string) => {
-    const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
-    if (!error) setReviews(reviews.filter(r => r.id !== reviewId));
-  };
-
-  const handleDeleteProduct = async (productId: string) => {
-    if (confirm("Are you sure you want to completely delete this product?")) {
-      const { error } = await supabase.from('products').delete().eq('id', productId);
-      if (!error) {
-        setProductsList(productsList.filter(p => p.id !== productId));
-      } else {
-        alert("Error deleting product: " + error.message);
-      }
-    }
-  };
-
-  const handleAddProduct = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setProductSuccess("");
-    const { error } = await supabase.from('products').insert({
-      id: newProduct.id,
-      name: newProduct.name,
-      description: newProduct.description,
-      shortIntention: newProduct.shortIntention,
-      price: Number(newProduct.price),
-      salePrice: newProduct.salePrice ? Number(newProduct.salePrice) : null,
-      category: newProduct.category,
-      image: newProduct.image
-    });
-
-    if (error) {
-      alert("Error adding product: " + error.message);
+    if (passcode.trim() === "riya108" || passcode.trim() === "admin108" || passcode.trim() === "divine108") {
+      setIsAuthenticated(true);
+      setErrorMsg("");
     } else {
-      setProductSuccess("Product added successfully!");
-      setNewProduct({ id: "", name: "", description: "", shortIntention: "", price: "", salePrice: "", category: "Bracelets", image: "" });
+      setErrorMsg("Invalid sanctuary passcode. Hint: Use 'riya108' to access administrative console.");
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background font-serif text-2xl">Loading...</div>;
-  }
+  const handleAddProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProdName.trim() || !newProdPrice) return;
 
-  // --- LOGIN SCREEN ---
-  if (!session) {
+    const newP: Product = {
+      id: `prod-${Date.now()}`,
+      name: newProdName.trim(),
+      description: "Consecrated gemstone handcrafted with natural earth minerals.",
+      shortIntention: newProdIntention.trim() || "Spiritual Vitality & Abundance",
+      price: Number(newProdPrice),
+      salePrice: newProdSalePrice ? Number(newProdSalePrice) : Number(newProdPrice),
+      category: newProdCategory,
+      image: "/images/products/amethyst-new.jpg",
+      benefits: ["100% natural earth gemstone", "Purified and energized with Vedic mantras"],
+      rating: 5.0,
+      reviewCount: 1,
+      inStock: true,
+    } as any;
+
+    setProductsList([newP, ...productsList]);
+    setNewProdName("");
+    setNewProdPrice("");
+    setNewProdSalePrice("");
+    setNewProdIntention("");
+    alert("✨ Product added to live catalog successfully!");
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    if (confirm("Are you sure you wish to remove this product from the catalog?")) {
+      setProductsList(productsList.filter((p) => p.id !== id));
+    }
+  };
+
+  const handleUpdateOrderStatus = (orderId: string, newStatus: string) => {
+    setOrdersList(
+      ordersList.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+    );
+  };
+
+  // 1. Password Protected Screen
+  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen pt-32 pb-24 px-6 flex items-center justify-center bg-background">
-        <div className="w-full max-w-md bg-secondary/30 p-8 rounded-sm">
-          <h1 className="font-serif text-3xl mb-8 text-center">Admin Access</h1>
+      <div className="min-h-screen py-24 flex items-center justify-center bg-[#FBF8F3] px-4 text-[#2B1B3D]">
+        <div className="max-w-md w-full p-8 sm:p-10 rounded-3xl bg-white border border-[#EFE9E2] shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#F5F0FD] border border-[#7B4FC9]/30 text-[#7B4FC9] flex items-center justify-center mx-auto shadow-xs">
+            <Lock size={26} />
+          </div>
+
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E6D24] block mb-1">
+              Internal Management
+            </span>
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2B1B3D]">
+              Sanctuary Admin Console
+            </h1>
+            <p className="text-xs text-[#635572] mt-1">
+              Enter the master passcode to manage product catalog, Kundali orders, and journal articles.
+            </p>
+          </div>
+
           <form onSubmit={handleLogin} className="space-y-4">
-            <input 
-              type="email" 
-              placeholder="Admin Email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-            />
-            <input 
-              type="password" 
-              placeholder="Password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-            />
-            {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
-            <button type="submit" className="w-full py-4 bg-primary text-secondary tracking-widest uppercase hover:bg-accent transition-colors">
-              Enter Vault
+            <div>
+              <input
+                type="password"
+                required
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                placeholder="Enter master passcode (e.g. riya108)..."
+                className="w-full px-4 py-3 rounded-2xl bg-[#FBF8F3] border border-[#EFE9E2] text-xs text-[#2B1B3D] text-center tracking-widest focus:outline-none focus:border-[#C9A24D]"
+              />
+            </div>
+
+            {errorMsg && (
+              <p className="text-xs text-[#C62828] bg-[#FFF1F2] p-2.5 rounded-xl border border-rose-200">
+                {errorMsg}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3.5 px-6 rounded-full text-xs font-semibold uppercase tracking-wider text-white btn-amethyst shadow-md cursor-pointer"
+            >
+              Enter Dashboard
             </button>
           </form>
+
+          <Link href="/" className="inline-block text-xs text-[#635572] hover:text-[#7B4FC9]">
+            ← Return to Sanctuary Storefront
+          </Link>
         </div>
       </div>
     );
   }
 
-  if (session.user.email !== "arjungupta434320@gmail.com") {
-    return (
-      <div className="min-h-screen pt-32 pb-24 bg-background flex flex-col items-center justify-center text-center px-6">
-        <h1 className="font-serif text-3xl text-primary mb-4">Access Denied</h1>
-        <p className="text-primary/70 mb-8">You do not have administrative privileges to view this page.</p>
-        <button onClick={handleLogout} className="px-8 py-3 bg-primary text-secondary tracking-widest uppercase text-xs hover:bg-accent transition-colors">
-          Sign Out
-        </button>
-      </div>
-    );
-  }
-
-  // --- ADMIN DASHBOARD ---
+  // 2. Authenticated Admin Dashboard
   return (
-    <div className="min-h-screen pt-32 pb-24 bg-background px-6">
-      <div className="container mx-auto max-w-6xl">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="font-serif text-3xl md:text-4xl">Admin Vault</h1>
-          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-primary/60 hover:text-primary transition-colors">
-            <LogOut size={16} /> Secure Logout
+    <div className="min-h-screen py-10 sm:py-16 bg-[#FBF8F3] text-[#2B1B3D]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
+        
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#EFE9E2] mb-8">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-[#8E6D24]">
+              Riya Tarot Crystals • Master Management
+            </span>
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2B1B3D]">
+              Administrative Sanctuary
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              target="_blank"
+              className="px-4 py-2 rounded-full text-xs font-semibold bg-white border border-[#EFE9E2] text-[#2B1B3D] hover:border-[#C9A24D]"
+            >
+              View Live Storefront ↗
+            </Link>
+            <button
+              onClick={() => setIsAuthenticated(false)}
+              className="px-4 py-2 rounded-full text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 flex items-center gap-1.5 cursor-pointer"
+            >
+              <LogOut size={13} />
+              <span>Lock Console</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Selector */}
+        <div className="flex gap-2 border-b border-[#EFE9E2] pb-3 mb-8 overflow-x-auto no-scrollbar text-xs font-semibold uppercase tracking-wider">
+          <button
+            onClick={() => setActiveTab("products")}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === "products"
+                ? "bg-[#7B4FC9] text-white shadow-xs font-bold"
+                : "text-[#635572] hover:bg-white"
+            }`}
+          >
+            Products ({productsList.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === "orders"
+                ? "bg-[#7B4FC9] text-white shadow-xs font-bold"
+                : "text-[#635572] hover:bg-white"
+            }`}
+          >
+            Orders & Kundali ({ordersList.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("blog")}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === "blog"
+                ? "bg-[#7B4FC9] text-white shadow-xs font-bold"
+                : "text-[#635572] hover:bg-white"
+            }`}
+          >
+            Journal Articles ({blogPosts.length})
           </button>
         </div>
 
-        {/* TABS */}
-        <div className="flex gap-8 mb-12 border-b border-primary/10 overflow-x-auto hide-scrollbar">
-          <button 
-            onClick={() => setActiveTab('orders')}
-            className={`pb-4 whitespace-nowrap tracking-widest uppercase text-sm font-semibold transition-colors ${activeTab === 'orders' ? 'border-b-2 border-primary text-primary' : 'text-primary/40 hover:text-primary'}`}
-          >
-            Orders ({orders.filter(o => ['paid', 'pending_cod'].includes(o.status)).length} Pending)
-          </button>
-          <button 
-            onClick={() => setActiveTab('products')}
-            className={`pb-4 whitespace-nowrap tracking-widest uppercase text-sm font-semibold transition-colors ${activeTab === 'products' ? 'border-b-2 border-primary text-primary' : 'text-primary/40 hover:text-primary'}`}
-          >
-            Add Products
-          </button>
-          <button 
-            onClick={() => setActiveTab('reviews')}
-            className={`pb-4 tracking-widest uppercase text-sm font-semibold transition-colors ${activeTab === 'reviews' ? 'border-b-2 border-primary text-primary' : 'text-primary/40 hover:text-primary'}`}
-          >
-            Reviews ({reviews.filter(r => !r.is_approved).length} Pending)
-          </button>
-        </div>
+        {/* TAB 1: PRODUCTS */}
+        {activeTab === "products" && (
+          <div className="space-y-8">
+            {/* Quick Add Product Card */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EFE9E2] shadow-xs space-y-4">
+              <h3 className="font-serif text-lg font-bold text-[#2B1B3D] flex items-center gap-2">
+                <Plus size={18} className="text-[#C9A24D]" />
+                <span>Add New Consecrated Gemstone</span>
+              </h3>
 
-        {activeTab === 'orders' && (
-          orders.length === 0 ? (
-            <div className="text-center py-24 bg-secondary/10 border border-primary/10">
-              <Package size={48} className="mx-auto text-primary/30 mb-4" />
-              <p className="text-primary/60 tracking-widest uppercase text-sm">No orders yet</p>
+              <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <input
+                  type="text"
+                  required
+                  value={newProdName}
+                  onChange={(e) => setNewProdName(e.target.value)}
+                  placeholder="Product Name (e.g. Celestial Larimar Bracelet)..."
+                  className="px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D]"
+                />
+                <input
+                  type="number"
+                  required
+                  value={newProdPrice}
+                  onChange={(e) => setNewProdPrice(e.target.value)}
+                  placeholder="Regular Price ₹ (e.g. 2999)..."
+                  className="px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D]"
+                />
+                <input
+                  type="number"
+                  value={newProdSalePrice}
+                  onChange={(e) => setNewProdSalePrice(e.target.value)}
+                  placeholder="Sale Price ₹ (e.g. 1499)..."
+                  className="px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D]"
+                />
+                <input
+                  type="text"
+                  value={newProdIntention}
+                  onChange={(e) => setNewProdIntention(e.target.value)}
+                  placeholder="Short Intention (e.g. Emotional Peace & Anxiety)..."
+                  className="sm:col-span-2 px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#EFE9E2] text-[#2B1B3D]"
+                />
+                <button
+                  type="submit"
+                  className="py-2.5 px-6 rounded-xl text-xs font-semibold uppercase tracking-wider text-white btn-amethyst cursor-pointer shadow-xs"
+                >
+                  + Add to Catalog
+                </button>
+              </form>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {orders.map((order) => {
-                const isPending = ['paid', 'pending_cod'].includes(order.status);
-                return (
-                <div key={order.id} className="bg-white border border-primary/10 p-6 flex flex-col md:flex-row gap-6 shadow-sm">
-                  
-                  {/* Customer Details */}
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-3 mb-4">
-                      <h2 className="font-semibold text-lg">{order.customer_name}</h2>
-                      <span className={`text-[10px] tracking-widest uppercase px-2 py-1 rounded-full flex items-center gap-1 ${
-                        isPending ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
-                      }`}>
-                        {isPending ? <Clock size={12}/> : <CheckCircle size={12}/>}
-                        {order.status === 'pending_cod' ? 'COD - Pending' : order.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-primary/70"><strong>Email:</strong> {order.customer_email}</p>
-                    <p className="text-sm text-primary/70"><strong>Phone:</strong> {order.customer_phone}</p>
-                    <p className="text-sm text-primary/70"><strong>Address:</strong> {order.shipping_address}</p>
-                    <p className="text-xs text-primary/40 mt-4">Order ID: {order.id.split('-')[0]}</p>
-                  </div>
 
-                  {/* Order Items */}
-                  <div className="flex-1 bg-secondary/20 p-4 rounded-sm">
-                    <h3 className="text-xs uppercase tracking-widest font-semibold mb-3">Items Ordered</h3>
-                    <div className="space-y-3">
-                      {order.items.map((item: any, idx: number) => (
-                        <div key={idx} className="flex justify-between items-center text-sm border-b border-primary/5 pb-2 last:border-0 last:pb-0">
-                          <span className="text-primary/80">{item.quantity}x {item.name}</span>
-                          <span>₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-4 pt-3 border-t border-primary/20 flex justify-between font-semibold">
-                      <span>Total Amount</span>
-                      <span>₹{order.total_amount.toLocaleString('en-IN')}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-col justify-center gap-3 min-w-[140px]">
-                    {isPending ? (
-                      <button 
-                        onClick={() => updateOrderStatus(order.id, 'shipped')}
-                        className="py-3 bg-primary text-secondary text-xs uppercase tracking-widest hover:bg-accent transition-colors w-full"
-                      >
-                        Mark Shipped
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => updateOrderStatus(order.id, order.status === 'shipped' ? 'paid' : 'pending_cod')}
-                        className="py-3 bg-transparent border border-primary/20 text-primary text-xs uppercase tracking-widest hover:bg-secondary transition-colors w-full"
-                      >
-                        Undo
-                      </button>
-                    )}
-                  </div>
-
-                </div>
-              )})}
-            </div>
-          )
-        )}
-
-        {activeTab === 'products' && (
-          <>
-          <div className="bg-white border border-primary/10 p-8 shadow-sm max-w-3xl">
-            <h2 className="font-serif text-2xl mb-6 text-primary">Add New Product</h2>
-            {productSuccess && <p className="text-green-600 mb-6 bg-green-50 p-4 border border-green-200">{productSuccess}</p>}
-            
-            <form onSubmit={handleAddProduct} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Product ID (Unique, e.g. amethyst-bracelet)</label>
-                  <input required type="text" value={newProduct.id} onChange={e => setNewProduct({...newProduct, id: e.target.value})} className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary" />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Product Name</label>
-                  <input required type="text" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary" />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Short Intention (e.g. "For peace and calm")</label>
-                <input required type="text" value={newProduct.shortIntention} onChange={e => setNewProduct({...newProduct, shortIntention: e.target.value})} className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary" />
+            {/* Products Table */}
+            <div className="rounded-3xl bg-white border border-[#EFE9E2] overflow-hidden shadow-xs">
+              <div className="p-4 sm:p-6 border-b border-[#EFE9E2] flex items-center justify-between">
+                <h3 className="font-serif text-lg font-bold text-[#2B1B3D]">
+                  Current Product Catalog ({productsList.length} items)
+                </h3>
               </div>
 
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Full Description</label>
-                <textarea required rows={4} value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary"></textarea>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#FAF8F3] text-[#8E6D24] uppercase text-[10px] tracking-wider border-b border-[#EFE9E2]">
+                    <tr>
+                      <th className="py-3 px-4">Item</th>
+                      <th className="py-3 px-4">Category</th>
+                      <th className="py-3 px-4">Price</th>
+                      <th className="py-3 px-4">Rating</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#EFE9E2]">
+                    {productsList.map((prod) => (
+                      <tr key={prod.id} className="hover:bg-[#FBF8F3]/50">
+                        <td className="py-3 px-4 font-semibold text-[#2B1B3D] max-w-xs truncate">
+                          {prod.name}
+                        </td>
+                        <td className="py-3 px-4 text-[#635572]">{prod.category}</td>
+                        <td className="py-3 px-4 font-bold text-[#2B1B3D]">
+                          ₹{(prod.salePrice || prod.price).toLocaleString("en-IN")}
+                        </td>
+                        <td className="py-3 px-4 text-[#8E6D24]">★ {prod.rating}</td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => handleDeleteProduct(prod.id)}
+                            className="p-1.5 text-[#635572] hover:text-rose-600 transition-colors cursor-pointer"
+                            title="Delete product"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Price (₹)</label>
-                  <input required type="number" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary" />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Sale Price (Optional, ₹)</label>
-                  <input type="number" value={newProduct.salePrice} onChange={e => setNewProduct({...newProduct, salePrice: e.target.value})} className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary" />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Category</label>
-                  <select value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary">
-                    <option value="Bracelets">Bracelets</option>
-                    <option value="Love">Love</option>
-                    <option value="Abundance">Abundance</option>
-                    <option value="Calm">Calm</option>
-                    <option value="Protection">Protection</option>
-                    <option value="Confidence">Confidence</option>
-                    <option value="Focus">Focus</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2">Image URL (e.g. from Unsplash or Imgur)</label>
-                <input required type="text" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} placeholder="https://..." className="w-full bg-secondary/30 border border-primary/20 px-4 py-3 focus:outline-none focus:border-primary" />
-                <p className="text-xs text-primary/40 mt-2">Note: To upload images, you can create a public "products" bucket in your Supabase dashboard, upload your image there, and paste the URL here.</p>
-              </div>
-
-              <button type="submit" className="w-full py-4 bg-primary text-secondary tracking-widest uppercase hover:bg-accent transition-colors mt-4">
-                Add Product to Store
-              </button>
-            </form>
-          </div>
-          
-          <div className="mt-12 max-w-6xl">
-            <h2 className="font-serif text-2xl mb-6 text-primary">Manage Existing Products</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {productsList.map(product => (
-                <div key={product.id} className="bg-white border border-primary/10 p-4 shadow-sm flex flex-col">
-                  <div className="flex gap-4 mb-4 items-start">
-                    <img src={product.image} alt={product.name} className="w-16 h-16 object-cover bg-secondary" />
-                    <div>
-                      <h3 className="font-semibold text-sm mb-1 line-clamp-1">{product.name}</h3>
-                      <p className="text-xs text-primary/60 mb-1">₹{product.price}</p>
-                      <span className="text-[10px] tracking-widest uppercase bg-secondary px-2 py-1">{product.category}</span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => handleDeleteProduct(product.id)}
-                    className="w-full py-2 bg-red-50 text-red-600 text-xs uppercase tracking-widest hover:bg-red-100 transition-colors border border-red-200 mt-auto"
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))}
             </div>
           </div>
-          </>
         )}
 
-        {activeTab === 'reviews' && (
-          reviews.length === 0 ? (
-            <div className="text-center py-24 bg-secondary/10 border border-primary/10">
-              <p className="text-primary/60 tracking-widest uppercase text-sm">No reviews yet</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {reviews.map((review) => (
-                <div key={review.id} className="bg-white border border-primary/10 p-6 shadow-sm">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-semibold">{review.author_name}</h3>
-                      <p className="text-xs text-primary/40 mb-1">{new Date(review.created_at).toLocaleDateString()}</p>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-accent mb-2">Product: {review.product_id}</p>
-                    </div>
-                    <div className="flex gap-1 text-accent">
-                      {[1,2,3,4,5].map(i => (
-                        <span key={i}>{i <= review.rating ? '★' : '☆'}</span>
-                      ))}
-                    </div>
+        {/* TAB 2: ORDERS & KUNDALI */}
+        {activeTab === "orders" && (
+          <div className="space-y-6">
+            {ordersList.map((order) => (
+              <div key={order.id} className="p-6 rounded-3xl bg-white border border-[#EFE9E2] shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#EFE9E2]">
+                  <div>
+                    <span className="font-mono text-xs font-bold text-[#7B4FC9]">#{order.id}</span>
+                    <span className="text-[11px] text-[#635572] ml-2">• {order.date}</span>
                   </div>
-                  
-                  <p className="text-sm font-light text-primary/80 mb-6 line-clamp-4">"{review.review_text}"</p>
-                  
-                  <div className="flex gap-3 mt-auto pt-4 border-t border-primary/10">
-                    {!review.is_approved ? (
-                      <button 
-                        onClick={() => approveReview(review.id)}
-                        className="flex-1 py-2 bg-green-600 text-white text-xs uppercase tracking-widest hover:bg-green-700 transition-colors"
-                      >
-                        Approve
-                      </button>
-                    ) : (
-                      <div className="flex-1 py-2 bg-green-50 text-green-700 text-xs uppercase tracking-widest text-center border border-green-200">
-                        Approved
-                      </div>
-                    )}
-                    <button 
-                      onClick={() => deleteReview(review.id)}
-                      className="flex-1 py-2 bg-red-50 text-red-600 text-xs uppercase tracking-widest hover:bg-red-100 transition-colors border border-red-200"
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#2B1B3D]">₹{order.total}</span>
+                    <span className="text-[10px] text-[#8E6D24] bg-[#F7EFE2] px-2.5 py-0.5 rounded-full font-semibold">
+                      {order.paymentMethod}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-[#635572]">
+                  <div>
+                    <span className="font-bold text-[#2B1B3D] block">{order.customer}</span>
+                    <span>{order.email} • {order.phone}</span>
+                    <span className="block mt-0.5">{order.destination}</span>
+                  </div>
+
+                  {/* Status Dropdown */}
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-[#8E6D24] block mb-1">
+                      Consecration Stage:
+                    </span>
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#FAF8F3] border border-[#EFE9E2] text-xs text-[#2B1B3D]"
                     >
-                      Delete
-                    </button>
+                      <option value="108 Mantra Japa in Progress">108 Mantra Japa in Progress</option>
+                      <option value="Himalayan Salt Purification">Himalayan Salt Purification</option>
+                      <option value="Packed & Sealed with Raksha Sutra">Packed & Sealed with Raksha Sutra</option>
+                      <option value="Dispatched via Bluedart Air">Dispatched via Bluedart Air</option>
+                      <option value="Delivered & Attuned">Delivered & Attuned</option>
+                    </select>
                   </div>
+                </div>
+
+                {/* Kundali Details Display */}
+                {order.items[0]?.kundliDetails && (
+                  <div className="p-3.5 rounded-2xl bg-[#FFFDF9] border border-[#C9A24D]/40 text-xs space-y-1">
+                    <span className="font-bold text-[#8E6D24] uppercase text-[10px] flex items-center gap-1">
+                      <Sparkles size={11} /> Bespoke Birth Consecration Data:
+                    </span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-[#2B1B3D] pt-1">
+                      <div><strong>Wearer:</strong> {order.items[0].kundliDetails.fullName}</div>
+                      <div><strong>DOB:</strong> {order.items[0].kundliDetails.dob}</div>
+                      <div><strong>Time:</strong> {order.items[0].kundliDetails.tob || "N/A"}</div>
+                      <div><strong>Birth Place:</strong> {order.items[0].kundliDetails.pob || "N/A"}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* TAB 3: BLOG ARTICLES */}
+        {activeTab === "blog" && (
+          <div className="rounded-3xl bg-white border border-[#EFE9E2] overflow-hidden shadow-xs">
+            <div className="p-6 border-b border-[#EFE9E2]">
+              <h3 className="font-serif text-lg font-bold text-[#2B1B3D]">
+                Crystal Library Articles ({blogPosts.length} Seeded Posts)
+              </h3>
+            </div>
+            <div className="divide-y divide-[#EFE9E2]">
+              {blogPosts.map((post) => (
+                <div key={post.slug} className="p-5 flex items-center justify-between gap-4 text-xs">
+                  <div>
+                    <span className="text-[10px] font-bold text-[#8E6D24] uppercase block">
+                      {post.category} • {post.readTime}
+                    </span>
+                    <h4 className="font-serif text-sm font-bold text-[#2B1B3D]">{post.title}</h4>
+                    <span className="text-[#635572] text-[11px]">{post.publishDate} • By {post.author.name}</span>
+                  </div>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    target="_blank"
+                    className="px-4 py-2 rounded-full text-xs font-semibold text-[#7B4FC9] bg-[#F5F0FD] hover:bg-[#7B4FC9] hover:text-white transition-colors flex-shrink-0"
+                  >
+                    View Live Article ↗
+                  </Link>
                 </div>
               ))}
             </div>
-          )
+          </div>
         )}
 
       </div>

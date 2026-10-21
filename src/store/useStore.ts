@@ -23,6 +23,16 @@ export interface Product {
   benefits: string[];
   energizationSteps?: string[];
   selectedBeadSize?: '8mm' | '10mm';
+  hardness?: string;
+  origin?: string;
+}
+
+export interface KundliDetails {
+  fullName: string;
+  dob: string;
+  tob?: string;
+  pob?: string;
+  intention?: string;
 }
 
 export interface CartItem extends Product {
@@ -30,6 +40,7 @@ export interface CartItem extends Product {
   selectedBeadSize?: '8mm' | '10mm';
   selectedWristSize?: string;
   cartKey?: string;
+  kundliDetails?: KundliDetails;
 }
 
 export interface Bundle {
@@ -69,7 +80,7 @@ interface StoreState {
   appliedCoupon: string | null;
   toast: ToastMessage | null;
   
-  addToCart: (product: Product, quantity?: number, beadSize?: '8mm' | '10mm', wristSize?: string) => void;
+  addToCart: (product: Product, quantity?: number, beadSize?: '8mm' | '10mm', wristSize?: string, kundliDetails?: KundliDetails) => void;
   addBundleToCart: (bundle: Bundle) => void;
   removeFromCart: (cartKeyOrId: string) => void;
   updateQuantity: (cartKeyOrId: string, quantity: number) => void;
@@ -122,10 +133,10 @@ export const useStore = create<StoreState>()(
 
       hideToast: () => set({ toast: null }),
 
-      addToCart: (product, quantity = 1, beadSize = '8mm', wristSize = 'Standard Elastic (6.5" - 7.5")') =>
+      addToCart: (product, quantity = 1, beadSize = '8mm', wristSize = 'Standard Elastic (6.5" - 7.5")', kundliDetails) =>
         set((state) => {
-          const itemKey = `${product.id}-${beadSize}`;
-          const existing = state.cart.find((item) => (item.cartKey || `${item.id}-${item.selectedBeadSize || '8mm'}`) === itemKey);
+          const itemKey = kundliDetails ? `${product.id}-${beadSize}-kundli-${Date.now()}` : `${product.id}-${beadSize}`;
+          const existing = !kundliDetails && state.cart.find((item) => (item.cartKey || `${item.id}-${item.selectedBeadSize || '8mm'}`) === itemKey);
           
           if (existing) {
             return {
@@ -143,7 +154,8 @@ export const useStore = create<StoreState>()(
             quantity,
             selectedBeadSize: beadSize,
             selectedWristSize: wristSize,
-            cartKey: itemKey
+            cartKey: itemKey,
+            kundliDetails,
           };
 
           return { cart: [...state.cart, newItem], isCartOpen: true };

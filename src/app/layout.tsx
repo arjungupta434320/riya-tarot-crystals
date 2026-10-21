@@ -14,6 +14,9 @@ import QuizModal from "@/components/QuizModal";
 import ToastNotifier from "@/components/ToastNotifier";
 import React from "react";
 import { AuthProvider } from "@/components/AuthProvider";
+import { SmoothScrollProvider } from "@/components/animations/SmoothScrollProvider";
+import { CustomCursor } from "@/components/animations/CustomCursor";
+import { Preloader } from "@/components/animations/Preloader";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -32,11 +35,20 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
+  themeColor: "#FBF8F3",
 };
 
 export const metadata: Metadata = {
-  title: "Riya Tarot Crystals | Certified & Energized Gems",
-  description: "Authentic, lab-certified healed crystal bracelets, natural gemstones, and bespoke Kundali & Chakra curation. 100% natural stones pre-energized with sacred mantras.",
+  title: "Riya Tarot Crystals | Certified & Energized Spiritual Gemstones",
+  description: "Authentic, lab-certified healed crystal bracelets, raw clusters, and Kundali & Chakra curations. 100% natural earth gems pre-energized with 108 Vedic Beej Mantras.",
+  metadataBase: new URL("https://riyatarotcrystals.com"),
+  openGraph: {
+    title: "Riya Tarot Crystals | Certified & Energized Spiritual Gemstones",
+    description: "Authentic, lab-certified healed crystal bracelets, raw clusters, and Kundali & Chakra curations.",
+    type: "website",
+    locale: "en_IN",
+    siteName: "Riya Tarot Crystals",
+  },
   icons: {
     icon: "/images/products/rose-quartz-new.jpg",
   }
@@ -49,25 +61,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cinzel.variable} ${plusJakartaSans.variable} font-sans antialiased min-h-[100dvh] flex flex-col bg-[#FAF9F6] text-[#2C2A29] pb-28 md:pb-0`}>
-        <AuthProvider>
-          <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-          <CartDrawer />
-          <QuickViewModal />
-          <CheckoutModal />
-          <PolicyModal />
-          <QuizModal />
-          <StickyMobileCartBar />
-          <MobileBottomNav />
-          <ToastNotifier />
-          <React.Suspense fallback={null}>
-            <WhatsAppWidget />
-          </React.Suspense>
-        </AuthProvider>
+      <body className={`${cinzel.variable} ${plusJakartaSans.variable} font-sans antialiased min-h-[100dvh] flex flex-col bg-[#FBF8F3] text-[#2B1B3D] pb-24 md:pb-0`}>
+        <SmoothScrollProvider>
+          <Preloader />
+          <CustomCursor />
+          <AuthProvider>
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <CartDrawer />
+            <QuickViewModal />
+            <CheckoutModal />
+            <PolicyModal />
+            <QuizModal />
+            <StickyMobileCartBar />
+            <MobileBottomNav />
+            <ToastNotifier />
+            <React.Suspense fallback={null}>
+              <WhatsAppWidget />
+            </React.Suspense>
+          </AuthProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   );
